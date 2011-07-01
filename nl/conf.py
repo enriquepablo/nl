@@ -15,10 +15,14 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with ln.  If not, see <http://www.gnu.org/licenses/>.
+import os
 
 debug_level = 'INFO'
 
 with_callback = True
+
+here = os.path.join(os.path.dirname(__file__))
+STORAGE_DIR = 'storage'
 
 ####################
 ### CLIPS CONFIG ###

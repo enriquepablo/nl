@@ -24,8 +24,7 @@ import logging
 from nl import conf
 
 logger = logging.getLogger('nl')
-here = os.path.join(os.path.dirname(__file__))
-log_dir = os.path.join(here, 'clips')
+log_dir = os.path.join(conf.here, 'clips')
 log_file = os.path.join(log_dir, 'log.clp')
 if not os.path.isfile(log_file):
     if not os.path.isdir(log_dir):

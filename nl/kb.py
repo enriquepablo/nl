@@ -1,14 +1,12 @@
 
+import os
 import clips
 
-from metanl import Number, Arith, Noun, Word, Verb, Subword, Namable
-from thing import Thing
-from state import Exists
-from prop import Fact
-from nltime import (Time, Instant, Duration, Finish, During,
-                    Coincide, MinComStart, MaxComEnd,
-                    Intersection)
-from rule import Rule
+from nl.metanl import Namable
+from nl.thing import Thing
+from nl.prop import Fact
+from nl.rule import Rule
+from nl import conf
 
 from log import logger
 import utils
@@ -122,3 +120,16 @@ def extend():
     acts = clips.Run()
     return acts
 
+def open(name):
+    fname = os.path.join(conf.STORAGE_DIR, name + '.cpl')
+    if os.path.isfile(fname):
+        clips.BLoad(fname)
+    try:
+        __import__('nlp.ont.' + name, fromlist=['nlp', 'ont'])
+    except ImportError:
+        pass
+
+def save(name):
+    if os.path.isdir(conf.STORAGE_DIR):
+        fname = os.path.join(conf.STORAGE_DIR, name + '.cpl')
+        clips.BSave(fname)
