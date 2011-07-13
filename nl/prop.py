@@ -68,6 +68,7 @@ class Fact(Namable):
                not isinstance(subj, ClassVarVar):
                 raise ValueError('Not a proper subject for fact')
             self.subject = subj
+        subj = self.subject
         if not isinstance(subj, ClassVar) and \
            not isinstance(subj, ClassVarVar) and \
                (not isinstance(self.predicate, ClassVar) and
