@@ -39,3 +39,28 @@ hdlr.setFormatter(formatter)
 logger.addHandler(hdlr)
 logger.setLevel(getattr(logging, conf.debug_level))
 
+if getattr(conf, 'HISTORY_DIR', False):
+    history_dir = conf.HISTORY_DIR
+else:
+    history_dir = os.path.join(conf.here, 'history')
+if not os.path.isdir(history_dir):
+    os.mkdir(history_dir)
+
+histories = {}
+
+def get_history(name):
+    history = histories.get(name, None)
+    if history:
+        return history
+    history = logging.getLogger('nl-' + name)
+    history_file = os.path.join(history_dir, name + '.nl')
+    if not os.path.isfile(history_file):
+        f = open(history_file, 'w')
+        f.close()
+    hdlr = logging.FileHandler(history_file)
+    formatter = logging.Formatter('%(message)s')
+    hdlr.setFormatter(formatter)
+    history.addHandler(hdlr)
+    history.setLevel(getattr(logging, 'INFO'))
+    histories[name] = history
+    return history

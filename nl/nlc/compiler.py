@@ -48,7 +48,7 @@ import nl
 import ply.yacc as yacc
 
 # Get the token map from the lexer.  This is required.
-from nlp.ircbot.lexer import tokens
+from nl.nlc.lexer import tokens
 
 VAR_PAT = re.compile(r'^([A-Z][a-zA-Z]+)(\d+)$')
 

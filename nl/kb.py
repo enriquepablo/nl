@@ -8,10 +8,10 @@ from nl.prop import Fact
 from nl.rule import Rule
 from nl import conf
 
-from log import logger
+from log import logger, history_dir, get_history
 import utils
 
-
+NAME = ''
 
 def tell(*args):
     '''
@@ -29,6 +29,8 @@ def tell(*args):
                 raise
         else:
             clips.Eval(s)
+        #to_history(sentence.tonl())
+
 
 def get_instancesn(*sentences):
     templs = []
@@ -121,15 +123,19 @@ def extend():
     return acts
 
 def open(name):
-    fname = os.path.join(conf.STORAGE_DIR, name + '.cpl')
-    if os.path.isfile(fname):
-        clips.BLoad(fname)
-    try:
-        __import__('nlp.ont.' + name, fromlist=['nlp', 'ont'])
-    except ImportError:
-        pass
+    global NAME
+    NAME = name
+    __import__('nlp.ont.' + name, globals(), locals())
+    history_file = os.path.join(history_dir, name + '.nl')
+    if os.path.isfile(history_file):
+        from nl.nlc.compiler import yacc
+        f = open(history_file, 'r')
+        for sen in f.readlines():
+            if sen.strip():
+                yacc.parse(sen)
+        f.close()
 
-def save(name):
-    if os.path.isdir(conf.STORAGE_DIR):
-        fname = os.path.join(conf.STORAGE_DIR, name + '.cpl')
-        clips.BSave(fname)
+def to_history(s):
+    if NAME:
+        history = get_history(NAME)
+        history.info(s)

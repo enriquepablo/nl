@@ -22,7 +22,7 @@ debug_level = 'INFO'
 with_callback = True
 
 here = os.path.join(os.path.dirname(__file__))
-STORAGE_DIR = 'storage'
+# HISTORY_DIR = ''
 
 ####################
 ### CLIPS CONFIG ###
