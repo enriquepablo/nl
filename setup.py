@@ -19,7 +19,8 @@ setup(
     zip_safe = False,
     dependency_links = [
     ],
-    install_requires = ['setuptools>=0.6c11',],
+    install_requires = ['setuptools>=0.6c11',
+                        'ply',],
     entry_points = {
 #        'console_scripts':
 #            [ 'plot_ph22 = nl.examples.physics22:plotPh22', ],
