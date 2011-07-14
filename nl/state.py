@@ -220,7 +220,7 @@ class Exists(Namable):
             mod_o = getattr(self, mod, _m)
             if mod_o is not _m:
                 put_meth = getattr(mod_o, 'clsput', mod_o.put)
-                slots += [mod, put_meth(vrs)]
+                slots.append(mod, put_meth(vrs))
         slots = ' '.join(slots)
         if self.clsvar:
             if vrs[self.clsvar]:
@@ -230,6 +230,21 @@ class Exists(Namable):
                 return '(add-pred %s %s)' % (self.clsvar, slots)
         return '(add-pred %s %s)' % (self.__class__.__name__, slots)
 
+    def _tonl(self):
+        """
+        put pred in clips as a make-instance action.
+        """
+        if self.value and utils.varpat.match(self.value):
+            return utils.var_tonl(self)
+        slots = []
+        for mod in self.mods:
+            mod_o = getattr(self, mod, _m)
+            if mod_o is not _m:
+                slots.append('%s %s' % (mod, mod_o._tonl()))
+        if slots:
+            slots = ', '.join(slots)
+            return '%s %s,' % (self.__class__.__name__.lower(), slots)
+        return self.__class__.__name__.lower()
 
     def get_isc(self, queries, vrs, ancestor, mod_path):
         """

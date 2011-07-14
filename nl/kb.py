@@ -6,7 +6,6 @@ from nl.metanl import Namable
 from nl.thing import Thing
 from nl.prop import Fact
 from nl.rule import Rule
-from nl import conf
 
 from log import logger, history_dir, get_history
 import utils
@@ -29,7 +28,9 @@ def tell(*args):
                 raise
         else:
             clips.Eval(s)
-        #to_history(sentence.tonl())
+        sen = sentence.tonl()
+        if sen:
+            to_history(sen)
 
 
 def get_instancesn(*sentences):
@@ -122,7 +123,7 @@ def extend():
     acts = clips.Run()
     return acts
 
-def open(name):
+def open_kb(name):
     global NAME
     NAME = name
     __import__('nlp.ont.' + name, globals(), locals())

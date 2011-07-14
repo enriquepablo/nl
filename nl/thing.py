@@ -126,3 +126,15 @@ class Thing(Namable):
             vrs = {}
         val = self.put(vrs)
         return '(reduce-class %s %s)' % (val, self.__class__.__name__)
+
+    def tonl(self):
+        """
+        """
+        return '%s isa %s.' % (utils.var_tonl(self), self.__class__.__name__.lower())
+
+    def _tonl(self):
+        """
+        """
+        if utils.varpat.match(self.value):
+            return utils.var_tonl(self)
+        return self.value

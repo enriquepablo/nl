@@ -451,6 +451,8 @@ class Namable(object):
             return utils.clips_instance(*(vrs[self.value]))
         return '?%s' % self.value
 
+    def tonl(self):
+        return ''
 
 class ArithSafeTime(Namable):
     pass

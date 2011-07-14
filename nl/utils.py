@@ -124,3 +124,9 @@ def parens(expr):
 def get_subclasses(cls):
     return [subclass[0] for subclass in subclasses.items() \
             if issubclass(subclass[1], cls)]
+
+def var_tonl(var):
+    if isinstance(var.value, basestring) and varpat.match(var.value):
+        classname = var.__class__.__name__
+        return classname + var.value
+    return var.value

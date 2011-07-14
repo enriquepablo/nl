@@ -17,6 +17,7 @@
 # along with ln.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
+import datetime
 import clips
 from nl.log import logger
 from nl import utils
@@ -80,6 +81,16 @@ class Instant(Time, Number):
                    (eq ?%(parent)s:time %(self)s))
             ''' % {'parent': ancestor, 'self': num} )
         return num
+
+    def _tonl(self):
+        val = str(utils.var_tonl(self))
+        try:
+            val = str(int(float(val)))
+        except ValueError:
+            pass
+        if val == '0':
+            val = 'now'
+        return 'at %s' % val
 
 
 class Duration(Time):
@@ -161,6 +172,11 @@ class Duration(Time):
                                            self.start.get_slot_constraint(vrs),
                  getattr(self, 'pend', False) and self.pend.put(vrs) or \
                                            self.end.get_slot_constraint(vrs))
+
+    def _tonl(self):
+        if utils.varpat.match(self.value):
+            return utils.var_tonl(self.value)
+        return 'from %s till %s' % (self.start._tonl(), self.end._tonl())
 
     def get_isc(self, queries, vrs, ancestor, mod_path):
         """

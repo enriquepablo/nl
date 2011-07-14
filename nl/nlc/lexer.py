@@ -48,12 +48,13 @@ def t_NUMBER(t):
     return t
 
 def t_TIME(t):
-    r'\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\{2}'
+    r'\d+'
     try:
-        dt = datetime.datetime.strptime(t.value, '%Y-%m-%d %H:%M:%S')
+        t.value = int(t.value)
     except ValueError:
         print "Invalid date: %s" % t.value
-    return int(time.mktime(dt.timetuple()))
+        t.value = 0
+    return t
 
 # Define a rule so we can track line numbers
 def t_newline(t):
