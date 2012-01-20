@@ -220,7 +220,7 @@ class Exists(Namable):
             mod_o = getattr(self, mod, _m)
             if mod_o is not _m:
                 put_meth = getattr(mod_o, 'clsput', mod_o.put)
-                slots.append(mod, put_meth(vrs))
+                slots += [mod, put_meth(vrs)]
         slots = ' '.join(slots)
         if self.clsvar:
             if vrs[self.clsvar]:
@@ -240,11 +240,12 @@ class Exists(Namable):
         for mod in self.mods:
             mod_o = getattr(self, mod, _m)
             if mod_o is not _m:
-                slots.append('%s %s' % (mod, mod_o._tonl()))
+                meth = getattr(mod_o, '_tonl_cls', mod_o._tonl)
+                slots.append('%s %s' % (mod, meth()))
         if slots:
             slots = ', '.join(slots)
-            return '%s %s,' % (self.__class__.__name__.lower(), slots)
-        return self.__class__.__name__.lower()
+            return '[%s %s]' % (self.__class__.__name__.lower(), slots)
+        return '[%s]' % self.__class__.__name__.lower()
 
     def get_isc(self, queries, vrs, ancestor, mod_path):
         """

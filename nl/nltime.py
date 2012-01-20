@@ -88,7 +88,7 @@ class Instant(Time, Number):
             val = str(int(float(val)))
         except ValueError:
             pass
-        if val == '0':
+        if val in ('0', '-1'):
             val = 'now'
         return 'at %s' % val
 

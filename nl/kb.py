@@ -7,10 +7,9 @@ from nl.thing import Thing
 from nl.prop import Fact
 from nl.rule import Rule
 
-from log import logger, history_dir, get_history
-import utils
+from nl.log import logger, history_dir
+from nl import utils
 
-NAME = ''
 
 def tell(*args):
     '''
@@ -30,7 +29,7 @@ def tell(*args):
             clips.Eval(s)
         sen = sentence.tonl()
         if sen:
-            to_history(sen)
+            utils.to_history(sen)
 
 
 def get_instancesn(*sentences):
@@ -112,6 +111,17 @@ def ask_obj(sentence):
                     sens.append(Fact.from_clips(ins))
     return sens
 
+def get_symbol(sym):
+    '''
+    '''
+    try:
+        return utils.get_class(sym.capitalize())
+    except KeyError:
+        try:
+            return ask_obj(Thing(sym))[0]
+        except IndexError:
+            return sym
+
 def extend():
     '''
     Run the CLIPS machine;
@@ -124,9 +134,13 @@ def extend():
     return acts
 
 def open_kb(name):
-    global NAME
-    NAME = name
-    __import__('nlp.ont.' + name, globals(), locals())
+    utils.NAME = name
+    # XXX wrong: this import writes into the history file,
+    # that is read below, and thus is imported twice.
+    try:
+        __import__('nlp.ont.' + name, globals(), locals())
+    except ImportError:
+        pass
     history_file = os.path.join(history_dir, name + '.nl')
     if os.path.isfile(history_file):
         from nl.nlc.compiler import yacc
@@ -135,8 +149,3 @@ def open_kb(name):
             if sen.strip():
                 yacc.parse(sen)
         f.close()
-
-def to_history(s):
-    if NAME:
-        history = get_history(NAME)
-        history.info(s)

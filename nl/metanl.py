@@ -68,6 +68,11 @@ class Word(type):
         '''
         return self.__name__
 
+    def _tonl_cls(self):
+        '''
+        '''
+        return self.__name__.lower()
+
     def get_constraint_cls(self, vrs, ancestor, mod_path):
         '''
         return clips snippet to be used
@@ -348,7 +353,8 @@ class Noun(Word):
 
     def __init__(cls, classname, bases, newdict):
         superclassname = bases[0].__name__
-        clp = '(defclass %s (is-a %s))' % (classname, bases[0].__name__)
+        clp = '(defclass %s (is-a %s))' % (classname, superclassname)
+        utils.to_history('%s are %s.' % (classname, superclassname))
         super(Noun, cls).__init__(classname, bases, newdict, clp=clp)
 
 utils.register('Noun', Noun)
@@ -391,8 +397,15 @@ class Verb(Word):
         for mod,modclass in cls.mods.items():
             if isinstance(modclass, type):
                 cls.mods[mod] = modclass.__name__
+        modification = ['%s a %s' % (mod, modclass)
+                  for mod, modclass in cls.mods.items()]
+        verb_def = '% is %s withsubject %s andcanbe %s.' % (classname,
+                                                        bases[0].__name__,
+                                                    cls.subject.__name__,
+                                                ', '.join(slots))
+        utils.to_history(verb_def)
         for kls in bases:
-            if getattr(kls, 'mods', _m):
+            if getattr(kls, 'mods', False):
                 cls.mods.update(kls.mods)
         super(Verb, cls).__init__(classname, bases, newdict, clp=clp)
 

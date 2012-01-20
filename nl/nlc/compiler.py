@@ -1,56 +1,52 @@
 """
-satatement = sentence, QMARK;
+statement : EXTEND DOT | sentence QMARK | sentence DOT | definition DOT
 
-statement = sentence, DOT;
+sentence : fact | copula
 
-sentence = fact;
+copula : SYMBOL ISA SYMBOL
 
-sentence = copula;
+fact : subject predicate time
 
-copula = SYMBOL, ISA, SYMBOL;
+subject : SYMBOL | VAR
 
-fact = VAR, predicate, time;
+time : NOW | AT instant | FROM instant TILL instant
 
-fact = SYMBOL, predicate, time;
+instant : TIME | VAR | NOW
 
-fact = VAR, VAR, time;
+predicate : predication | VAR
 
-fact = SYMBOL, VAR, time;
+predication : LPAREN v_verb modification RPAREN | LPAREN v_verb RPAREN
 
-time = AT instant;
+v_verb : SYMBOL | VAR
 
-time = FROM instant TILL instant;
+modification : modifier COMMA modification | modifier
 
-instant = TIME;
+modifier :  SYMBOL object
 
-instant = NOW;
+object : SYMBOL | NUMBER | pred | VAR
 
-instant = VAR;
+definition : noun-def | verb-def
 
-predicate = SYMBOL, items;
+noun-def : SYMBOL ARE SYMBOL
 
-items = modifier, items;
+verb-def : SYMBOL IS SYMBOL WITHSUBJECT SYMBOL ANDCANBE modification-def | SYMBOL IS SYMBOL WITHSUBJECT SYMBOL
 
-items = modifier;
+modification-def : mod-def COMMA modification-def | mod-def
 
-items = ;
-
-modifier = SYMBOL, VAR, COMMA;
-
-modifier = SYMBOL, SYMBOL, COMMA;
-
-modifier = SYMBOL, predicate, COMMA;
-
-modifier = SYMBOL, NUMBER, COMMA;
+mod-def : SYMBOL A SYMBOL
 """
 import re
 import nl
 import ply.yacc as yacc
 
 # Get the token map from the lexer.  This is required.
-from nl.nlc.lexer import tokens
+from nl.nlc.lexer import tokens, t_VAR, t_NUMBER
 
-VAR_PAT = re.compile(r'^([A-Z][a-zA-Z]+)(\d+)$')
+def shut_up_pyflakes():
+    return tokens
+
+VAR_PAT = re.compile(t_VAR)
+NUM_PAT = re.compile(t_NUMBER)
 
 precedence = (
     ('left', 'COMMA'),
@@ -65,6 +61,11 @@ def _from_var(var):
 
 # BNF
 
+def p_extend(p):
+    'statement : EXTEND DOT'
+    response = nl.kb.extend()
+    p[0] = str(response)
+
 def p_question(p):
     'statement : sentence QMARK'
     response = nl.kb.ask(p[1])
@@ -75,12 +76,14 @@ def p_assertion(p):
     response = nl.kb.tell(p[1])
     p[0] = str(response)
 
-def p_sentence_fact(p):
-    'sentence : fact'
-    p[0] = p[1]
+def p_definition(p):
+    'statement : definition DOT'
+    response = p[1]
+    p[0] = str(response)
 
-def p_sentence_copula(p):
-    'sentence : copula'
+def p_sentence(p):
+    '''sentence : fact
+                | copula'''
     p[0] = p[1]
 
 def p_copula(p):
@@ -88,76 +91,124 @@ def p_copula(p):
     cls = nl.utils.get_class(p[3].capitalize())
     p[0] = cls(p[1])
 
-def p_fact_var_pred(p):
-    'fact : VAR predicate time'
-    p[0] = nl.Fact(_from_var(p[1]), p[2], p[3])
+def p_fact(p):
+    'fact : subject predicate time'
+    p[0] = nl.Fact(p[1], p[2], p[3])
 
-def p_fact_symbol_pred(p):
-    'fact : SYMBOL predicate time'
-    p[0] = nl.Fact(*(p[1:]))
+def p_subject(p):
+    '''subject : SYMBOL
+               | VAR'''
+    if VAR_PAT.match(p[1]):
+        p[0] = _from_var(p[1])
+    else:
+        p[0] = p[1]
 
-def p_fact_var_var(p):
-    'fact : VAR VAR time'
-    p[0] = nl.Fact(_from_var(p[1]), _from_var(p[2]), p[3])
+def p_time(p):
+    '''time : NOW
+            | AT instant
+            | FROM instant TILL instant'''
+    if p[1] == 'now':
+        p[0] = nl.Instant('now')
+    elif p[1] == 'at':
+        p[0] = nl.Instant(p[2])
+    elif p[1] == 'from':
+        p[0] = nl.Duration(start=p[2], end=p[4])
 
-def p_fact_symbol_var(p):
-    'fact : SYMBOL VAR time'
-    p[0] = nl.Fact(p[1], _from_var(p[2]), p[3])
-
-def p_time_instant(p):
-    'time : AT instant'
-    p[0] = p[2]
-
-def p_time_duration(p):
-    'time : FROM instant TILL instant'
-    p[0] = nl.Duration(start=p[2], end=p[4])
-
-def p_instant_time(p):
-    'instant : TIME'
+def p_instant(p):
+    '''instant : TIME
+               | VAR
+               | NOW'''
     p[0] = nl.Instant(p[1])
 
-def p_instant_now(p):
-    'instant : NOW'
-    p[0] = nl.Instant('now')
-
-def p_time_var(p):
-    'instant : VAR'
-    p[0] = _from_var(p[1])
-
 def p_predicate(p):
-    'predicate : SYMBOL items'
-    cls = nl.utils.get_class(p[1].capitalize())
-    kwargs = p[2] and dict(p[2]) or {}
-    p[0] = cls(**kwargs)
- 
-def p_items(p):
-    'items : modifier items'
-    p[0] = [p[1]] + p[2]
- 
-#def p_items_one(p):
-#    'items : modifier'
-#    p[0] = [p[1]]
- 
-def p_items_empty(p):
-    'items :'
-    pass
- 
-def p_modifier_symbol(p):
-    'modifier : SYMBOL SYMBOL COMMA'
-    thing = nl.kb.ask_obj(nl.Thing(p[2]))[0]
-    p[0] = (p[1], thing)
+    '''predicate : predication
+                 | VAR'''
+    if VAR_PAT.match(p[1]):
+        p[0] = _from_var(p[1])
+    else:
+        p[0] = p[1]
 
-def p_modifier_var(p):
-    'modifier : SYMBOL VAR COMMA'
-    p[0] = (p[1], _from_var(p[2]))
+def p_predication(p):
+    '''predication : LPAREN v_verb modification RPAREN
+                   | LPAREN v_verb RPAREN'''
+    if p[3] == ']':
+        p[0] = p[2]()
+    else:
+        p[0] = p[2](**p[3])
 
-def p_modifier_pred(p):
-    'modifier : SYMBOL predicate COMMA'
-    p[0] = (p[1], p[2])
+def p_v_verb(p):
+    '''v_verb : SYMBOL
+              | SYMBOL VAR'''
+    if VAR_PAT.match(p[1]):
+        p[0] = _from_var(p[1])
+    else:
+        p[0] = nl.utils.get_class(p[1])
+ 
+def p_modification(p):
+    '''modification : modifier COMMA modification
+                    | modifier'''
+    if len(p) == 4:
+        p[0] = p[1].update(p[3])
+    else:
+        p[0] = p[1]
+ 
+def p_modifier(p):
+    'modifier :  SYMBOL object'
+    p[0] = {p[1]: p[2]}
+    
+ 
+def p_object(p):
+    '''object : SYMBOL
+              | NUMBER
+              | predication
+              | VAR'''
+    if VAR_PAT.match(p[1]):
+        p[0] = _from_var(p[1])
+    elif NUM_PAT.match(p[1]):
+        p[0] = nl.Number(p[1])
+    else:
+        p[0] = p[1]
 
-def p_modifier_number(p):
-    'modifier : SYMBOL NUMBER COMMA'
-    p[0] = (p[1], int(p[2]))
+def p_def(p):
+    '''definition : noun-def
+                  | verb-def'''
+    p[0] = p[1]
+
+def p_noun_def(p):
+    'noun-def : SYMBOL ARE SYMBOL'
+    superclass = nl.utils.get_class(p[3].capitalize())
+    metaclass = superclass.__metaclass__
+    name = p[1].capitalize()
+    cls = metaclass(name, bases=(superclass,), newdict={})
+    nl.utils.register(name, cls)
+    p[0] = 'Noun %s defined.' % name
+
+def p_verb_def(p):
+    '''verb-def : SYMBOL IS SYMBOL WITHSUBJECT SYMBOL ANDCANBE modification-def
+                | SYMBOL IS SYMBOL WITHSUBJECT SYMBOL'''
+    superclass = nl.utils.get_class(p[3].capitalize())
+    metaclass = superclass.__metaclass__
+    nclass = nl.utils.get_class(p[5].capitalize())
+    newdict = {'subject': nclass}
+    if len(p) == 8:
+        newdict['mods'] = p[7]
+    name = p[1].capitalize()
+    vclass = metaclass(name, bases=(superclass,), newdict=newdict)
+    nl.utils.register(name, vclass)
+    p[0] = 'Verb %s defined.' % name
+
+def p_modification_def(p):
+    '''modification-def : mod-def COMMA modification-def
+                        | mod-def'''
+    if len(p) == 4:
+        p[0] = p[1].update(p[3])
+    else:
+        p[0] = p[1]
+
+def p_mod_def(p):
+    'mod-def : SYMBOL A SYMBOL'
+    obj = nl.utils.get_class(p[3].capitalize())
+    p[0] = {p[1]: obj}
 
 
 # Error rule for syntax errors

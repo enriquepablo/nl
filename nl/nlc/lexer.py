@@ -1,8 +1,11 @@
 """
+
+<common noun> is <common noun> [, <common noun> ...].
+
+<verb> is <verb> [, <verb> ...] [that can be <prep> <symbol> [, <prep> <symbol> ...]].
+
 """
 
-import datetime
-import time
 import ply.lex as lex
 
 tokens = (
@@ -18,6 +21,14 @@ tokens = (
     'AT',
     'FROM',
     'TILL',
+    'LPAREN',
+    'RPAREN',
+    'EXTEND',
+    'ARE',
+    'IS',
+    'ANDCANBE',
+    'A',
+    'WITHSUBJECT',
 )
 
 reserved = {
@@ -25,26 +36,26 @@ reserved = {
     'now': 'NOW',
     'at': 'AT',
     'from': 'FROM',
-    'til': 'TILL',
+    'till': 'TILL',
+    'extend': 'EXTEND',
+    'are': 'ARE',
+    'is': 'IS',
+    'andcanbe': 'ANDCANBE',
+    'a': 'A',
+    'withsubject': 'WITHSUBJECT',
 }
 
 t_COMMA = r','
 t_DOT = r'\.'
 t_QMARK = r'\?'
-t_VAR = r'[A-Z][A-Za-z]+[0-9]+'
+t_LPAREN = r'\['
+t_RPAREN = r'\]'
+t_VAR = r'([A-Z][a-z]+)[0-9]+'
+t_NUMBER = r'(\d+)'
 
 def t_SYMBOL(t):
-    r'[a-z]+'
+    r'[a-z_]+'
     t.type = reserved.get(t.value, 'SYMBOL')    # Check for reserved words
-    return t
-
-def t_NUMBER(t):
-    r'\d+'
-    try:
-        t.value = int(t.value)    
-    except ValueError:
-        print "Number %s is too large!" % t.value
-        t.value = 0
     return t
 
 def t_TIME(t):

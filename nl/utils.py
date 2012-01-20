@@ -19,11 +19,11 @@
 
 import time
 import re
-import os
-import sys
 import pkg_resources  # setuptools specific
 
-from nl.log import logger
+from nl.log import logger, get_history
+
+NAME = ''
 
 # vars are always XNUM
 varpat = re.compile(r'^[A-Z]\w*\d+$')
@@ -49,10 +49,10 @@ def _newvar():
 
 subclasses = {}
 def register(clsname, cls):
-    subclasses[clsname] = cls
+    subclasses[clsname.lower()] = cls
 
 def get_class(cls):
-    return isinstance(cls, basestring) and subclasses[cls] or cls
+    return isinstance(cls, basestring) and subclasses[cls.lower()] or cls
 
 
 def clips_instance(ancestor, mod_path, meths=None):
@@ -130,3 +130,8 @@ def var_tonl(var):
         classname = var.__class__.__name__
         return classname + var.value
     return var.value
+
+def to_history(s):
+    if NAME:
+        history = get_history(NAME)
+        history.info(s)
