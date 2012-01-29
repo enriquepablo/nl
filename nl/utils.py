@@ -122,7 +122,7 @@ def parens(expr):
     return terms
 
 def get_subclasses(cls):
-    return [subclass[0] for subclass in subclasses.items() \
+    return [subclass[0] for subclass in subclasses.items()
             if issubclass(subclass[1], cls)]
 
 def var_tonl(var):

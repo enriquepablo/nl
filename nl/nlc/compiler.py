@@ -175,10 +175,13 @@ def p_object(p):
               | NUMBER
               | predication
               | VAR'''
-    if VAR_PAT.match(p[1]):
-        p[0] = _from_var(p[1])
-    elif NUM_PAT.match(p[1]):
-        p[0] = nl.Number(p[1])
+    if isinstance(p[1], basestring):
+        if VAR_PAT.match(p[1]):
+            p[0] = _from_var(p[1])
+        elif NUM_PAT.match(p[1]):
+            p[0] = nl.Number(p[1])
+        else:
+            p[0] = nl.kb.get_symbol(p[1])
     else:
         p[0] = p[1]
 
