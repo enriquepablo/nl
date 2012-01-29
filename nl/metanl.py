@@ -354,7 +354,8 @@ class Noun(Word):
     def __init__(cls, classname, bases, newdict):
         superclassname = bases[0].__name__
         clp = '(defclass %s (is-a %s))' % (classname, superclassname)
-        utils.to_history('%s are %s.' % (classname, superclassname))
+        utils.to_history('%s are %s.' % (classname.lower(),
+                                         superclassname.lower()))
         super(Noun, cls).__init__(classname, bases, newdict, clp=clp)
 
 utils.register('Noun', Noun)
@@ -397,12 +398,14 @@ class Verb(Word):
         for mod,modclass in cls.mods.items():
             if isinstance(modclass, type):
                 cls.mods[mod] = modclass.__name__
-        modification = ['%s a %s' % (mod, modclass)
+        modification = ['%s a %s' % (mod, modclass.lower())
                   for mod, modclass in cls.mods.items()]
-        verb_def = '% is %s withsubject %s andcanbe %s.' % (classname,
-                                                        bases[0].__name__,
-                                                    cls.subject.__name__,
-                                                ', '.join(slots))
+        verb_def = '%s is %s withsubject %s' % (classname.lower(),
+                                                bases[0].__name__.lower(),
+                                                cls.subject.__name__.lower())
+        if modification:
+            verb_def += ' andcanbe ' + ', '.join(modification)
+        verb_def += '.'
         utils.to_history(verb_def)
         for kls in bases:
             if getattr(kls, 'mods', False):
@@ -493,7 +496,7 @@ class Number(Namable):
         self.arg2 = str(arg2)
         try:
             self.value = str(float(value))
-        except ValueError:
+        except (ValueError, TypeError):
             if value[0] == '(':
                 args = utils.parens(value)
                 self.value = args[0]

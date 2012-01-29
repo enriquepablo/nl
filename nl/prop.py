@@ -154,7 +154,7 @@ class Fact(Namable):
     def tonl(self):
         """
         """
-        return '%s %s %s.' % (self.subject._tonl(),
+        return '%s %s %s' % (self.subject._tonl(),
                              self.predicate._tonl(),
                              self.time._tonl())
 

@@ -131,12 +131,12 @@ def p_instant(p):
     '''instant : TIME
                | VAR
                | NOW'''
-    p[0] = nl.Instant(p[1])
+    p[0] = p[1]
 
 def p_predicate(p):
     '''predicate : predication
                  | VAR'''
-    if VAR_PAT.match(p[1]):
+    if issubclass(p[1].__class__, basestring) and VAR_PAT.match(p[1]):
         p[0] = _from_var(p[1])
     else:
         p[0] = p[1]
@@ -224,7 +224,7 @@ def p_mod_def(p):
     p[0] = {p[1]: obj}
 
 def p_rule(p):
-    'rule : IF COLON conditions SEMICOLON THEN COLON consecuences DOT'
+    'rule : IF COLON conditions SEMICOLON THEN COLON consecuences'
     p[0] = nl.Rule(p[3], p[7])
 
 def p_conditions(p):

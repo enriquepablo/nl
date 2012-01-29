@@ -130,7 +130,7 @@ class Thing(Namable):
     def tonl(self):
         """
         """
-        return '%s isa %s.' % (utils.var_tonl(self), self.__class__.__name__.lower())
+        return '%s isa %s' % (utils.var_tonl(self), self.__class__.__name__.lower())
 
     def _tonl(self):
         """

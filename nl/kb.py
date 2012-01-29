@@ -29,7 +29,7 @@ def tell(*args):
             clips.Eval(s)
         sen = sentence.tonl()
         if sen:
-            utils.to_history(sen)
+            utils.to_history(sen + '.')
 
 
 def get_instancesn(*sentences):
@@ -145,7 +145,10 @@ def open_kb(name):
     if os.path.isfile(history_file):
         from nl.nlc.compiler import yacc
         f = open(history_file, 'r')
+        name = utils.NAME
+        utils.NAME = ''
         for sen in f.readlines():
             if sen.strip():
                 yacc.parse(sen)
+        utils.NAME = name
         f.close()

@@ -57,3 +57,8 @@ class Rule(Namable):
                                           ' '.join(cprems),
                                           ' '.join(ccons))
 
+    def tonl(self):
+        prems = '; '.join([sen.tonl() for sen in self.prems])
+        cons = '; '.join([sen.tonl() for sen in self.cons])
+        return 'if: %s; then: %s' % (prems, cons)
+
