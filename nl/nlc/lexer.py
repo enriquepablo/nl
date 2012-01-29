@@ -29,6 +29,11 @@ tokens = (
     'ANDCANBE',
     'A',
     'WITHSUBJECT',
+    'IF',
+    'THEN',
+    'COLON',
+    'SEMICOLON',
+    'ENDDURATION',
 )
 
 reserved = {
@@ -43,6 +48,9 @@ reserved = {
     'andcanbe': 'ANDCANBE',
     'a': 'A',
     'withsubject': 'WITHSUBJECT',
+    'if': 'IF',
+    'then': 'THEN',
+    'endduration': 'ENDDURATION',
 }
 
 t_COMMA = r','
@@ -50,6 +58,8 @@ t_DOT = r'\.'
 t_QMARK = r'\?'
 t_LPAREN = r'\['
 t_RPAREN = r'\]'
+t_COLON = r':'
+t_SEMICOLON = r';'
 t_VAR = r'([A-Z][a-z]+)[0-9]+'
 t_NUMBER = r'(\d+)'
 

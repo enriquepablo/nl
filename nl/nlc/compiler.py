@@ -1,5 +1,5 @@
 """
-statement : EXTEND DOT | sentence QMARK | sentence DOT | definition DOT
+statement : EXTEND DOT | sentence QMARK | sentence DOT | definition DOT | rule DOT
 
 sentence : fact | copula
 
@@ -34,6 +34,18 @@ verb-def : SYMBOL IS SYMBOL WITHSUBJECT SYMBOL ANDCANBE modification-def | SYMBO
 modification-def : mod-def COMMA modification-def | mod-def
 
 mod-def : SYMBOL A SYMBOL
+
+rule : IF COLON conditions SEMICOLON THEN COLON consecuences DOT
+
+conditions : conditions SEMICOLON condition | condition
+
+condition : sentence | arith-condition | durations-coincidence | instant-in-durations
+
+consecuences : consecuences SEMICOLON consecuence | consecuence
+
+consecuence : sentence | end-duration
+
+end-duration : ENDDURATION VAR
 """
 import re
 import nl
@@ -72,7 +84,8 @@ def p_question(p):
     p[0] = str(response)
 
 def p_assertion(p):
-    'statement : sentence DOT'
+    '''statement : sentence DOT
+                 | rule DOT'''
     response = nl.kb.tell(p[1])
     p[0] = str(response)
 
@@ -138,7 +151,7 @@ def p_predication(p):
 
 def p_v_verb(p):
     '''v_verb : SYMBOL
-              | SYMBOL VAR'''
+              | VAR'''
     if VAR_PAT.match(p[1]):
         p[0] = _from_var(p[1])
     else:
@@ -210,6 +223,40 @@ def p_mod_def(p):
     obj = nl.utils.get_class(p[3].capitalize())
     p[0] = {p[1]: obj}
 
+def p_rule(p):
+    'rule : IF COLON conditions SEMICOLON THEN COLON consecuences DOT'
+    p[0] = nl.Rule(p[3], p[7])
+
+def p_conditions(p):
+    '''conditions : conditions SEMICOLON condition
+                  | condition'''
+    if len(p) == 4:
+        p[1].append(p[3])
+        p[0] = p[1]
+    else:
+        p[0] = [p[1]]
+
+def p_condition(p):
+    'condition : sentence'
+    p[0] = p[1]
+
+def p_consecuences(p):
+    '''consecuences : consecuences SEMICOLON consecuence
+                    | consecuence'''
+    if len(p) == 4:
+        p[1].append(p[3])
+        p[0] = p[1]
+    else:
+        p[0] = [p[1]]
+
+def p_consecuence(p):
+    '''consecuence : sentence
+                   | end-duration'''
+    p[0] = p[1]
+
+def p_end_duration(p):
+    'end-duration : ENDDURATION VAR'
+    p[0] = nl.Finish(_from_var(p[2]))
 
 # Error rule for syntax errors
 def p_error(p):
