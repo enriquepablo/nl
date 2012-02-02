@@ -188,6 +188,14 @@ class ClassVar(object):
         # a hack
         return self.cls(self.value).put(vrs)
 
+    def _tonl(self):
+        if self.cls.__name__ != 'Namable':
+            return self.cls.__name__ + self.value
+        return self.value
+
+    def tonl(self):
+        return 'ToNlFromClassVar'
+
 
 class ClassVarVar(object):
     '''
@@ -313,6 +321,13 @@ class ClassVarVar(object):
         q = self.get_query(vrs, ancestor, mod_path)
         queries += q
 
+    def _tonl(self):
+        if self.value:
+            return self.value
+        if self.cls.__name__ != 'Namable':
+            return self.cls.__name__ + self.clsvar
+        return self.clsvar
+
 
 class Subword(object):
     '''
@@ -333,6 +348,10 @@ class Subword(object):
                              (subclassp %(sub)s %(sup)s)))
                ''' % {'sub': sub,
                       'sup': sup}
+
+    def tonl(self):
+        return '%s subwordof %s' % (getattr(self.sub, '_tonl', self.sub.tonl)(),
+                                    getattr(self.sub, '_tonl', self.sup.tonl)())
 
 
 class Noun(Word):

@@ -175,7 +175,7 @@ class Duration(Time):
 
     def _tonl(self):
         if utils.varpat.match(self.value):
-            return utils.var_tonl(self.value)
+            return utils.var_tonl(self)
         return 'from %s till %s' % (self.start._tonl(), self.end._tonl())
 
     def get_isc(self, queries, vrs, ancestor, mod_path):
