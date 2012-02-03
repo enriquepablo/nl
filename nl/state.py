@@ -230,7 +230,7 @@ class Exists(Namable):
                 return '(add-pred %s %s)' % (self.clsvar, slots)
         return '(add-pred %s %s)' % (self.__class__.__name__, slots)
 
-    def _tonl(self):
+    def tonl(self):
         """
         put pred in clips as a make-instance action.
         """
@@ -240,7 +240,7 @@ class Exists(Namable):
         for mod in self.mods:
             mod_o = getattr(self, mod, _m)
             if mod_o is not _m:
-                meth = getattr(mod_o, '_tonl_cls', mod_o._tonl)
+                meth = getattr(mod_o, 'tonl_cls', mod_o.tonl)
                 slots.append('%s %s' % (mod, meth()))
         if slots:
             slots = ', '.join(slots)

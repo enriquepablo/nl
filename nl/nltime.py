@@ -82,7 +82,7 @@ class Instant(Time, Number):
             ''' % {'parent': ancestor, 'self': num} )
         return num
 
-    def _tonl(self):
+    def tonl(self):
         val = str(utils.var_tonl(self))
         try:
             val = str(int(float(val)))
@@ -173,10 +173,18 @@ class Duration(Time):
                  getattr(self, 'pend', False) and self.pend.put(vrs) or \
                                            self.end.get_slot_constraint(vrs))
 
-    def _tonl(self):
+    def tonl(self):
         if utils.varpat.match(self.value):
             return utils.var_tonl(self)
-        return 'from %s till %s' % (self.start._tonl(), self.end._tonl())
+        try:
+            start = self.start
+        except AttributeError:
+            start = self.pstart
+        try:
+            end = self.end
+        except AttributeError:
+            end = self.pend
+        return 'from %s till %s' % (start.tonl(), end.tonl())
 
     def get_isc(self, queries, vrs, ancestor, mod_path):
         """

@@ -27,7 +27,7 @@ def tell(*args):
                 raise
         else:
             clips.Eval(s)
-        sen = sentence.tonl()
+        sen = sentence.sen_tonl()
         if sen:
             utils.to_history(sen + '.')
 

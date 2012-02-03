@@ -23,7 +23,7 @@ import pkg_resources  # setuptools specific
 
 from nl.log import logger, get_history
 
-NAME = ''
+NAME = 'primero'
 
 # vars are always XNUM
 varpat = re.compile(r'^[A-Z]\w*\d+$')

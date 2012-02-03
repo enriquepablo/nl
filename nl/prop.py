@@ -151,12 +151,13 @@ class Fact(Namable):
         t = self.time.put(vrs)
         return '(add-prop %s %s %s %s)' % (s, p, t, self.truth)
 
-    def tonl(self):
+    def sen_tonl(self):
         """
         """
-        return '%s %s %s' % (self.subject._tonl(),
-                             self.predicate._tonl(),
-                             self.time._tonl())
+        return '%s %s %s' % (getattr(self.subject, 'tonl_cls',
+                                     self.subject.tonl)(),
+                             self.predicate.tonl(),
+                             self.time.tonl())
 
 
 def factback(csubj, cpred, ctime, ctruth):
