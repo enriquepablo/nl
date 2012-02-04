@@ -171,15 +171,15 @@ class Required(Exists):
 #all at the same time,
 #the person performs the given action
 kb.tell(Rule([
-     Fact(Permission('M1'), Required(to=Verb('V1', Action), over=Status('S1')), Duration('T5')),
-     Fact(Person('P1'), Wants(to=Verb('V1', Action)(what=Content('C1'))), Instant('I1')),
-     Fact(Content('C1'), Has(what=Status('S1')), Duration('T1')),
-     Fact(Content('C1'), Located(where=Context('X1')), Duration('T2')),
-     Fact(Person('P1'), Has(what=Role('R1'), where=Context('X1')), Duration('T3')),
-     Fact(Role('R1'), Has(what=Permission('M1')), Duration('T4')),
-     During('I1', 'T1','T2','T3','T4', 'T5')
+     Fact(Permission('Permission1'), Required(to=Verb('ActionVerb1', Action), over=Status('Status1')), Duration('Duration1')),
+     Fact(Person('Person1'), Wants(to=Verb('ActionVerb1', Action)(what=Content('Content1'))), Instant('Instant1')),
+     Fact(Content('Content1'), Has(what=Status('Status1')), Duration('Duration5')),
+     Fact(Content('Content1'), Located(where=Context('Context1')), Duration('Duration2')),
+     Fact(Person('Person1'), Has(what=Role('Role1'), where=Context('Context1')), Duration('Duration3')),
+     Fact(Role('Role1'), Has(what=Permission('Permission1')), Duration('Duration4')),
+     During('Instant1', 'Duration1','Duration2','Duration3','Duration4', 'Duration5')
  ],[
-     Fact(Person('P1'), Verb('V1', Action)(what=Content('C1')), Instant('I1'))]))
+     Fact(Person('Person1'), Verb('ActionVerb1', Action)(what=Content('Content1')), Instant('Instant1'))]))
 
 kb.tell( Fact(view_perm, Required(to=View, over=public), Duration(start='now', end='now')) )
 
@@ -245,15 +245,15 @@ class HasTransition(Exists):
 
 try:
   kb.tell(Rule([
-    Fact(Workflow('W1'), HasTransition(start=Status('S1'), end=Status('S2'), by=Verb('V1', WfAction)), Duration('T4')),
-    Fact(Workflow('W1'), Assigned(to=Noun('N1', Content), where=Context('X1')), Duration('T2')),
-    Fact(Noun('N1', Content)('C1'), Located(where=Context('X1')), Duration('T1')),
-    Fact(Person('P1'), Verb('V1', WfAction)(what=Noun('N1', Content)('C1')), Instant('I1')),
-    Fact(Noun('N1', Content)('C1'), Has(what=Status('S1')), Duration('T3')),
-    During('I1', 'T1','T2', 'T3', 'T4')
+    Fact(Workflow('Workflow1'), HasTransition(start=Status('Status1'), end=Status('Status2'), by=Verb('WfActionVerb1', WfAction)), Duration('Duration1')),
+    Fact(Workflow('Workflow1'), Assigned(to=Noun('ContentNoun1', Content), where=Context('Context1')), Duration('Duration2')),
+    Fact(Noun('ContentNoun1', Content)('Content1'), Located(where=Context('Context1')), Duration('Duration3')),
+    Fact(Person('Person1'), Verb('WfActionVerb1', WfAction)(what=Noun('ContentNoun1', Content)('Content1')), Instant('Instant1')),
+    Fact(Noun('ContentNoun1', Content)('Content1'), Has(what=Status('Status1')), Duration('Duration4')),
+    During('Instant1', 'Duration3','Duration2', 'Duration4', 'Duration1')
 ],[
-    Fact(Noun('N1')('C1'), Has(what=Status('S2')), Duration(start=Instant('I1'), end=MaxComEnd('T1', 'T2'))),
-    Finish('T3', 'I1')]))
+    Fact(Noun('ContentNoun1')('Content1'), Has(what=Status('Status2')), Duration(start=Instant('Instant1'), end=MaxComEnd('Duration3', 'Duration2'))),
+    Finish('Duration4', 'Instant1')]))
 except:
    import clips
    logger.info(clips.ErrorStream.Read())
@@ -315,11 +315,11 @@ def r_owner_can_action(action):
     The owner of a content can perform the given action on the content
     """
     kb.tell( Rule([
-        Fact(Person('P1'), Wants(to=action(what=Content('C1'))), Instant('I1')),
-        Fact(Person('P1'), Owns(what=Content('C1')), Duration('T1')),
-        During('I1','T1')
+        Fact(Person('Person1'), Wants(to=action(what=Content('Content1'))), Instant('Instant1')),
+        Fact(Person('Person1'), Owns(what=Content('Content1')), Duration('Duration1')),
+        During('Instant1','Duration1')
     ],[
-        Fact(Person('P1'), action(what=Content('C1')), Instant('I1'))]))
+        Fact(Person('Person1'), action(what=Content('Content1')), Instant('Instant1'))]))
 
 r_owner_can_action(View)
 
@@ -340,13 +340,13 @@ class Give(Exists):
 # then he gives it to her
 # and she owns it from then on
 kb.tell(Rule([
-        Fact(Person('P1'), Wants(to=Give(what=Content('C1'), whom=Person('P2'))), Instant('I1')),
-        Fact(Person('P1'), Owns(what=Content('C1')), Duration('T1')),
-        During('I1', 'T1')
+        Fact(Person('Person1'), Wants(to=Give(what=Content('Content1'), whom=Person('Person2'))), Instant('Instant1')),
+        Fact(Person('Person1'), Owns(what=Content('Content1')), Duration('Duration1')),
+        During('Instant1', 'Duration1')
     ],[
-        Fact(Person('P1'), Give(what=Content('C1'), whom=Person('P2')), Instant('I1')),
-        Fact(Person('P2'), Owns(what=Content('C1')), Duration(start=Instant('I1'))),
-        Finish('T1', 'I1')]))
+        Fact(Person('Person1'), Give(what=Content('Content1'), whom=Person('Person2')), Instant('Instant1')),
+        Fact(Person('Person2'), Owns(what=Content('Content1')), Duration(start=Instant('Instant1'))),
+        Finish('Duration1', 'Instant1')]))
 
 
 # ACTION STEPS
@@ -360,12 +360,12 @@ class Contains(Exists):
 
 # try:
 kb.tell(Rule([
-    Subword(Verb('V1'), Action),
-    Fact(Person('P1'), Verb('V1')('A1'), Instant('I1')),
-    Fact(Verb('V1'), Contains(what=ActionStep('S1')), Duration('T1')),
-    During('I1', 'T1')
+    Subword(Verb('ActionVerb1'), Action),
+    Fact(Person('Person1'), Verb('ActionVerb1')('Action1'), Instant('Instant1')),
+    Fact(Verb('ActionVerb1'), Contains(what=ActionStep('ActionStep1')), Duration('Duration1')),
+    During('Instant1', 'Duration1')
 ],[
-    Fact(Person('P1'), Has(what=ActionStep('S1')), Instant('I1')),
+    Fact(Person('Person1'), Has(what=ActionStep('ActionStep1')), Instant('Instant1')),
 ]))
 # except:
 #     import clips
@@ -373,10 +373,10 @@ kb.tell(Rule([
 
 
 kb.tell(Rule([
-    Fact(Thing('P1'), Has(what=ActionStep('S1')), Instant('I1')),
-    Fact(ActionStep('S1'), Has(what=ActionStep('S2')), Duration('T1')),
-    During('I1', 'T1')
+    Fact(Thing('Thing1'), Has(what=ActionStep('ActionStep1')), Instant('Instant1')),
+    Fact(ActionStep('ActionStep1'), Has(what=ActionStep('ActionStep2')), Duration('Duration1')),
+    During('Instant1', 'Duration1')
 ],[
-    Fact(Thing('P1'), Has(what=ActionStep('S2')), Instant('I1')),
+    Fact(Thing('Thing1'), Has(what=ActionStep('ActionStep2')), Instant('Instant1')),
 ]))
 

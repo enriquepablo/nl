@@ -73,52 +73,52 @@ class IsForced(Exists):
 
 
 r1 = Rule([
-           Fact(Body('X1'), HasPosition(x='X2', y='X3'), 'X4'),
-           Fact(Body('X1'), HasSpeed(x='X5', y='X6'), 'X4'),
-           Arith('(< X4 %s)' % time)
+           Fact(Body('Body1'), HasPosition(x='Number1', y='Number2'), 'Time1'),
+           Fact(Body('Body1'), HasSpeed(x='Number3', y='Number4'), 'Time1'),
+           Arith('(< Time1 %s)' % time)
            ], [
-           Fact(Body('X1'), HasPosition(x=Number('+', arg1='X2',
-                                                      arg2='X5'),
-                                        y='(+ X3 X6)'), '(+ X4 1)')
+           Fact(Body('Body1'), HasPosition(x=Number('+', arg1='Number1',
+                                                      arg2='Number3'),
+                                        y='(+ Number2 Number4)'), '(+ Time1 1)')
            ])
 
 
 r2 = Rule([
-           Fact(Body('X1'), HasSpeed(x='X2', y='X3'), 'X4'),
-           Fact(Body('X1'), HasAcceleration(x='X5', y='X6'), 'X4'),
-           Arith('(< X4 %s)' % time)
+           Fact(Body('Body1'), HasSpeed(x='Number1', y='Number2'), 'Time1'),
+           Fact(Body('Body1'), HasAcceleration(x='Number3', y='Number4'), 'Time1'),
+           Arith('(< Time1 %s)' % time)
            ], [
-           Fact(Body('X1'), HasSpeed(x='(+ X2 X5)', y='(+ X3 X6)'), '(+ X4 1)')
+           Fact(Body('Body1'), HasSpeed(x='(+ Number1 Number3)', y='(+ Number2 Number4)'), '(+ Time1 1)')
            ])
 
 
 r3 = Rule([
-           Fact(Body('X1'), IsForced(x='X2', y='X3'), 'X4'),
-           Fact(Body('X1'), HasMass(kgs='X5'), 'X4'),
-           Arith('(< X4 %s)' % time)
+           Fact(Body('Body1'), IsForced(x='Number1', y='Number2'), 'Time1'),
+           Fact(Body('Body1'), HasMass(kgs='Number3'), 'Time1'),
+           Arith('(< Time1 %s)' % time)
            ], [
-           Fact(Body('X1'), HasAcceleration(x='(/ X2 X5)', y='(/ X3 X5)'), '(+ X4 1)')
+           Fact(Body('Body1'), HasAcceleration(x='(/ Number1 Number3)', y='(/ Number2 Number3)'), '(+ Time1 1)')
            ])
 
 r4 = Rule([
-           Fact(Body('X1'), HasPosition(x='X2', y='X3'), 'X4'),
-           Fact(Body('X1'), HasMass(kgs='X5'), 'X4'),
-           Fact(Body('X6'), HasPosition(x='X7', y='X8'), 'X4'),
-           Fact(Body('X6'), HasMass(kgs='X9'), 'X4'),
-           Arith('(< X4 %s)' % time),
-           Arith('(neq X1 X6)')
+           Fact(Body('Body1'), HasPosition(x='Number1', y='Number2'), 'Time1'),
+           Fact(Body('Body1'), HasMass(kgs='Number3'), 'Time1'),
+           Fact(Body('Body2'), HasPosition(x='Number4', y='Number5'), 'Time1'),
+           Fact(Body('Body2'), HasMass(kgs='Number6'), 'Time1'),
+           Arith('(< Time1 %s)' % time),
+           Arith('(neq Body1 Body2)')
            ], [
-           Fact(Body('X1'), IsForced(
-              x='(- 0 (/ (* (* X5 X9) (- X2 X7)) (** (+ (** (- X2 X7) 2) (** (- X3 X8) 2)) (/ 3 2))))',
-              y='(- 0 (/ (* (* X5 X9) (- X3 X8)) (** (+ (** (- X2 X7) 2) (** (- X3 X8) 2)) (/ 3 2))))'),
-              '(+ X4 1)')])
+           Fact(Body('Body1'), IsForced(
+              x='(- 0 (/ (* (* Number3 Number6) (- Number1 Number4)) (** (+ (** (- Number1 Number4) 2) (** (- Number2 Number5) 2)) (/ 3 2))))',
+              y='(- 0 (/ (* (* Number3 Number6) (- Number2 Number5)) (** (+ (** (- Number1 Number4) 2) (** (- Number2 Number5) 2)) (/ 3 2))))'),
+              '(+ Time1 1)')])
 
 r5 = Rule([
-           Fact(Body('X1'), HasMass(kgs='X2'), 'X3'),
-           Arith('(< X3 %s)' % time)
+           Fact(Body('Body1'), HasMass(kgs='Number1'), 'Time3'),
+           Arith('(< Time3 %s)' % time)
            ],
            [
-           Fact(Body('X1'), HasMass(kgs='X2'), '(+ X3 1)')
+           Fact(Body('Body1'), HasMass(kgs='Number1'), '(+ Time3 1)')
            ])
 
 

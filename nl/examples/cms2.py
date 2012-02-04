@@ -36,11 +36,11 @@ class Wants(Exists):
 
 # if someone wants to do something, and can do it, she does it
 r1 = Rule([
-        Fact(Person('X1'), Wants(to=Exists('X4')), Instant('X2')), # XXX only Exists can be a var
-        Fact(Person('X1'), Can(what=Exists('X4')), Duration('X3')),
-        During(Instant('X2'), Duration('X3'))
+        Fact(Person('Person1'), Wants(to=Exists('Exists1')), Instant('Instant1')), # XXX only Exists can be a var
+        Fact(Person('Person1'), Can(what=Exists('Exists1')), Duration('Duration1')),
+        During(Instant('Instant1'), Duration('Duration1'))
         ],[
-        Fact(Person('X1'), 'X4', Instant('X2'))])
+        Fact(Person('Person1'), 'Exists1', Instant('Instant1'))])
 
 # Has is a verb that takes a person as a subject and a thing as a modificator
 class Has(Exists):
@@ -54,11 +54,11 @@ class IsNeeded(Exists):
 
 # If something is needed for some state, and something else has it, that something else can be in that state
 r2 = Rule([
-        Fact(Thing('X2'), IsNeeded(for_action=Exists('X4')), Duration('X3')),
-        Fact(Person('X1'), Has(what=Thing('X2')), Duration('X5')),
-        Coincide(Duration('X3'), Duration('X5'))
+        Fact(Thing('Thing1'), IsNeeded(for_action=Exists('Exists1')), Duration('Duration1')),
+        Fact(Person('Person1'), Has(what=Thing('Thing1')), Duration('Duration2')),
+        Coincide(Duration('Duration1'), Duration('Duration2'))
         ],[
-        Fact(Thing('X1'), Can(what=Exists('X4')), Duration(start=MinComStart('X3', 'X5'), end=MaxComEnd('X3', 'X5')))])
+        Fact(Thing('Person1'), Can(what=Exists('Exists1')), Duration(start=MinComStart('Duration1', 'Duration2'), end=MaxComEnd('Duration1', 'Duration2')))])
 
 # IsIn is a verb that takes a Thing as a subject and a Thing as a modificator
 class IsIn(Exists):
@@ -67,11 +67,11 @@ class IsIn(Exists):
 
 # if a thing is in another thing, and that another thing is in yet another, the first is in the third as well
 r3 = Rule([
-        Fact(Thing('X1'), IsIn(what=Thing('X2')), Duration('X4')),
-        Fact(Thing('X2'), IsIn(what=Thing('X3')), Duration('X5')),
-        Coincide(Duration('X4'), Duration('X5'))
+        Fact(Thing('Thing1'), IsIn(what=Thing('Thing2')), Duration('Duration1')),
+        Fact(Thing('Thing2'), IsIn(what=Thing('Thing3')), Duration('Duration2')),
+        Coincide(Duration('Duration1'), Duration('Duration2'))
         ],[
-        Fact(Thing('X1'), IsIn(what=Thing('X3')), Duration(start=MinComStart('X4', 'X5'), end=MaxComEnd('X4', 'X5')))])
+        Fact(Thing('Thing1'), IsIn(what=Thing('Thing3')), Duration(start=MinComStart('Duration1', 'Duration2'), end=MaxComEnd('Duration1', 'Duration2')))])
 
 # CONTENT MANAGEMENT
 
@@ -83,22 +83,22 @@ class Permission(Thing): pass
 
 # If a person is in a group, and that group has some permission, the person also has it
 r4 = Rule([
-        Fact(Person('X1'), IsIn(what=Group('X2')), Duration('X3')),
-        Fact(Group('X2'), Has(what=Permission('X4')), Duration('X5')),
-        Coincide(Duration('X3'), Duration('X5'))
+        Fact(Person('Person1'), IsIn(what=Group('Group1')), Duration('Duration1')),
+        Fact(Group('Group1'), Has(what=Permission('Permission1')), Duration('Duration2')),
+        Coincide(Duration('Duration1'), Duration('Duration2'))
         ],[
-        Fact(Person('X1'), Has(what=Permission('X4')), Duration(start=MinComStart('X3', 'X5'), end=MaxComEnd('X3', 'X5')))])
+        Fact(Person('Person1'), Has(what=Permission('Permission1')), Duration(start=MinComStart('Duration1', 'Duration2'), end=MaxComEnd('Duration1', 'Duration2')))])
 
 # a role s a person
 class Role(Thing): pass
 
 # If a person has a role, and that role has some permission, the person also has it
 r5 = Rule([
-        Fact(Person('X1'), Has(what=Role('X2')), Duration('X3')),
-        Fact(Role('X2'), Has(what=Permission('X4')), Duration('X5')),
-        Coincide(Duration('X3'), Duration('X5'))
+        Fact(Person('Person1'), Has(what=Role('Role1')), Duration('Duration1')),
+        Fact(Role('Role1'), Has(what=Permission('Permission1')), Duration('Duration2')),
+        Coincide(Duration('Duration1'), Duration('Duration2'))
         ],[
-        Fact(Person('X1'), Has(what=Permission('X4')), Duration(start=MinComStart('X3', 'X5'), end=MaxComEnd('X3', 'X5')))])
+        Fact(Person('Person1'), Has(what=Permission('Permission1')), Duration(start=MinComStart('Duration1', 'Duration2'), end=MaxComEnd('Duration1', 'Duration2')))])
 
 # admin is a person
 admin = Person('admin')
@@ -110,15 +110,15 @@ manager = Role('manager')
 
 # everyperson has role member
 r6 = Rule([
-        Person('X1')
+        Person('Person1')
         ],[
-        Fact(Person('X1'), Has(what=member), Duration(start=Instant('now')))])
+        Fact(Person('Person1'), Has(what=member), Duration(start=Instant('now')))])
 
 # the manager role has every permission
 r9 = Rule([
-        Permission('X2'),
+        Permission('Permission2'),
         ],[
-        Fact(manager, Has(what=Permission('X2')), Duration(start=Instant('now'))),])
+        Fact(manager, Has(what=Permission('Permission2')), Duration(start=Instant('now'))),])
 
 # admin has role manager
 p1 = Fact(admin, Has(what=manager), Duration(start=Instant('now')))
@@ -149,11 +149,11 @@ create_perm = Permission('create_perm')
 
 # if a person wants to create something, and has create_perm, he creates it
 r10 = Rule([
-        Fact(Person('X1'), Wants(to=Create(what=Thing('X33'))), Instant('X2')),
-        Fact(Person('X1'), Has(what=create_perm), Duration('X3')),
-        During(Instant('X2'), Duration('X3'))
+        Fact(Person('Person1'), Wants(to=Create(what=Thing('Thing1'))), Instant('Instant1')),
+        Fact(Person('Person1'), Has(what=create_perm), Duration('Duration1')),
+        During(Instant('Instant1'), Duration('Duration1'))
         ],[
-        Fact(Person('X1'), Create(what=Thing('X33')), Instant('X2'))])
+        Fact(Person('Person1'), Create(what=Thing('Thing1')), Instant('Instant1'))])
 
 # a status is a thing
 class Status(Thing): pass
@@ -165,11 +165,11 @@ public = Status('public')
 
 # if a person creates some content, the content is private and that person is its owner.
 r7 = Rule([
-        Fact(Person('X1'), Create(what=Content('X2')), Instant('X3')),
+        Fact(Person('Person1'), Create(what=Content('Content1')), Instant('Instant1')),
         ],[
-        Content('X2'),
-        Fact(Person('X1'), IsOwner(of=Content('X2')), Duration(start=Instant('X3'))),
-        Fact(Content('X2'), Has(what=private), Duration(start=Instant('X3')))])
+        Content('Content1'),
+        Fact(Person('Person1'), IsOwner(of=Content('Content1')), Duration(start=Instant('Instant1'))),
+        Fact(Content('Content1'), Has(what=private), Duration(start=Instant('Instant1')))])
 
 # View is a verb that takes a person as subject and a thing as modificator.
 class View(Exists):
@@ -178,23 +178,23 @@ class View(Exists):
 
 # if some content is public, the basic_perm is needed to view it
 r12 = Rule([
-        Fact(Content('X1'), Has(what=public), Duration('X2'))
+        Fact(Content('Content1'), Has(what=public), Duration('Duration1'))
         ],[
-        Fact(basic_perm, IsNeeded(for_action=View(what=Content('X1'))), Duration('X2'))])
+        Fact(basic_perm, IsNeeded(for_action=View(what=Content('Content1'))), Duration('Duration1'))])
 
 # if some content is private, the manage_perm is needed to view it
 r13 = Rule([
-        Fact(Content('X1'), Has(what=private), Duration('X2'))
+        Fact(Content('Content1'), Has(what=private), Duration('Duration1'))
         ],[
-        Fact(manage_perm, IsNeeded(for_action=View(what=Content('X1'))), Duration('X2'))])
+        Fact(manage_perm, IsNeeded(for_action=View(what=Content('Content1'))), Duration('Duration1'))])
 
 # if someone is owner of some content that is private, she can view it
 r14 = Rule([
-        Fact(Content('X1'), Has(what=private), Duration('X3')),
-        Fact(Person('X2'), IsOwner(of=Content('X1')), Duration('X4')),
-        Coincide(Duration('X3'), Duration('X4'))
+        Fact(Content('Content1'), Has(what=private), Duration('Duration1')),
+        Fact(Person('Person1'), IsOwner(of=Content('Content1')), Duration('Duration2')),
+        Coincide(Duration('Duration1'), Duration('Duration2'))
         ],[
-        Fact(Person('X2'), Can(what=View(what=Content('X1'))), Duration(start=MinComStart('X3', 'X4'), end=MaxComEnd('X3', 'X4')))])
+        Fact(Person('Person1'), Can(what=View(what=Content('Content1'))), Duration(start=MinComStart('Duration1', 'Duration2'), end=MaxComEnd('Duration1', 'Duration2')))])
 
 # Publish is a verb that takes a person as subject and some content as modificator
 class Publish(Exists):
@@ -203,18 +203,18 @@ class Publish(Exists):
 
 # If someone publishes some content, it stops having any previous state and has public XXX ¿y si X5 ya termino?
 r15 = Rule([
-        Fact(Person('X1'), Publish(what=Content('X2')), Instant('X3')),
-        Fact(Content('X2'), Has(what=private), Duration('X5')),
-        During(Instant('X3'), Duration('X5'))
+        Fact(Person('Person1'), Publish(what=Content('Content1')), Instant('Instant1')),
+        Fact(Content('Content1'), Has(what=private), Duration('Duration1')),
+        During(Instant('Instant1'), Duration('Duration1'))
         ],[
-        Finish('X5', 'X3'),
-        Fact(Content('X2'), Has(what=public), Duration(start=Instant('X3')))])
+        Finish('Duration1', 'Instant1'),
+        Fact(Content('Content1'), Has(what=public), Duration(start=Instant('Instant1')))])
 
 # manage_perm is needed to publish anything
 r16 = Rule([
-        Fact(Content('X1'), Has(what=private), Duration('X2'))
+        Fact(Content('Content1'), Has(what=private), Duration('Duration1'))
         ],[
-        Fact(manage_perm, IsNeeded(for_action=Publish(what=Content('X1'))), Duration('X2'))])
+        Fact(manage_perm, IsNeeded(for_action=Publish(what=Content('Content1'))), Duration('Duration1'))])
 
 # Hide is a verb that takes a person as subject and a content as object
 class Hide(Exists):
@@ -223,24 +223,24 @@ class Hide(Exists):
 
 # If someone hides some content, it stops having any previous state and has private
 r17 = Rule([
-        Fact(Person('X1'), Hide(what=Content('X2')), Instant('X3')),
-        Fact(Content('X2'), Has(what=public), Duration('X5')),
-        During(Instant('X3'), Duration('X5'))
+        Fact(Person('Person1'), Hide(what=Content('Content1')), Instant('Instant1')),
+        Fact(Content('Content1'), Has(what=public), Duration('Duration1')),
+        During(Instant('Instant1'), Duration('Duration1'))
         ],[
-        Finish('X5', 'X3'),
-        Fact(Content('X2'), Has(what=private), Duration(start=Instant('X3')))])
+        Finish('Duration1', 'Instant1'),
+        Fact(Content('Content1'), Has(what=private), Duration(start=Instant('Instant1')))])
 
 # if a person is the owner of some content, she can hide it
 r18 = Rule([
-        Fact(Person('X1'), IsOwner(of=Content('X2')), Duration('X3'))
+        Fact(Person('Person1'), IsOwner(of=Content('Content1')), Duration('Duration1'))
         ],[
-        Fact(Person('X1'), Can(what=Hide(what=Content('X2'))), Duration('X3'))])
+        Fact(Person('Person1'), Can(what=Hide(what=Content('Content1'))), Duration('Duration1'))])
 
 # manage_perm is needed to hide anything
 r19 = Rule([
-        Fact(Content('X1'), Has(what=public), Duration('X2'))
+        Fact(Content('Content1'), Has(what=public), Duration('Duration1'))
         ],[
-        Fact(manage_perm, IsNeeded(for_action=Hide(what=Content('X1'))), Duration('X2'))])
+        Fact(manage_perm, IsNeeded(for_action=Hide(what=Content('Content1'))), Duration('Duration1'))])
 
 
 # enter everything into the database

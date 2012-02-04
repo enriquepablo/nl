@@ -72,62 +72,62 @@ class Smelling(Exists):
     mods = {'what': Food}
 
 kb.tell(Rule([
-    Fact(Person('X1'), Wants(what=Verb('V1', Eats)))
+    Fact(Person('Person1'), Wants(what=Verb('EatsVerb1', Eats)))
 ],[
-    Fact(Person('X1'), Eats(what=Food))
+    Fact(Person('Person1'), Eats(what=Food))
 ]))
 
 kb.tell(Rule([
-    Fact(Person('X1'), Wants(what=Verb('V1', Eats)))
+    Fact(Person('Person1'), Wants(what=Verb('EatsVerb1', Eats)))
 ],[
-    Fact(Person('X1'), Tries(what=Verb('V1', Eats)))
+    Fact(Person('Person1'), Tries(what=Verb('EatsVerb1', Eats)))
 ]))
 
 kb.tell(Rule([
-    Fact(Person('X1'), Wanting(what=Eating(what=b1))),
-    Fact(Person('X1'), Wants(what=Verb('V1', Eats)))
+    Fact(Person('Person1'), Wanting(what=Eating(what=b1))),
+    Fact(Person('Person1'), Wants(what=Verb('EatsVerb1', Eats)))
 ],[
-    Fact(Person('X1'), Eating(what=b1))
+    Fact(Person('Person1'), Eating(what=b1))
 ]))
 
 kb.tell(Rule([
-    Fact(Person('X1'), Wanting(what=Eating(what=b2))),
-    Fact(Person('X1'), Wants(what=Eats))
+    Fact(Person('Person1'), Wanting(what=Eating(what=b2))),
+    Fact(Person('Person1'), Wants(what=Eats))
 ],[
-    Fact(Person('X1'), Eating(what=b2))
+    Fact(Person('Person1'), Eating(what=b2))
 ]))
 
 kb.tell(Rule([
-    Fact(Person('X1'), Wanting(what=Verb('V1', Eating)(what=Food('F1')))),
-    Fact(Person('X1'), Verb('V1', Eating)('E1'))
+    Fact(Person('Person1'), Wanting(what=Verb('EatingVerb1', Eating)(what=Food('Food1')))),
+    Fact(Person('Person1'), Verb('EatingVerb1', Eating)('Eating1'))
 ],[
-    Fact(Person('X1'), Feels(what=Verb('V1', Eating)(what=Food('F1')))),
+    Fact(Person('Person1'), Feels(what=Verb('EatingVerb1', Eating)(what=Food('Food1')))),
 ]))
 
 kb.tell(Rule([
-    Fact(Person('X1'), Eating(what=b2)),
-    Fact(Person('X1'), Wants(what=Verb('V1', Eats)))
+    Fact(Person('Person1'), Eating(what=b2)),
+    Fact(Person('Person1'), Wants(what=Verb('EatsVerb1', Eats)))
 ],[
-    Fact(Person('X1'), Eating(what=b3))
+    Fact(Person('Person1'), Eating(what=b3))
 ]))
 
 kb.tell(Rule([
-    Fact(Person('X1'), Wants(what=Verb('V1', Eats))),
-    Fact(Person('X1'), Eating(what=b3)),
+    Fact(Person('Person1'), Wants(what=Verb('EatsVerb1', Eats))),
+    Fact(Person('Person1'), Eating(what=b3)),
 ],[
-    Fact(Person('X1'), Drinking(what=b4))
+    Fact(Person('Person1'), Drinking(what=b4))
 ]))
 
 kb.tell(Rule([
-    Fact(Person('X1'), Drinking(what=Noun('N1', Food)('F1'))),
-    Fact(Person('X1'), Eats(what=Noun('N1', Food)))
+    Fact(Person('Person1'), Drinking(what=Noun('FoodNoun1', Food)('Food1'))),
+    Fact(Person('Person1'), Eats(what=Noun('FoodNoun1', Food)))
 ],[
-    Fact(Person('X1'), Eating(what=Noun('N1', Food)('F1')))
+    Fact(Person('Person1'), Eating(what=Noun('FoodNoun1', Food)('Food1')))
 ]))
 
 kb.tell(Rule([
-    Fact(Person('X1'), Eats(what=Noun('N1', Food))),
-    Fact(Person('X1'), Eating(what=Noun('N1', Food)('F1'))),
+    Fact(Person('Person1'), Eats(what=Noun('FoodNoun1', Food))),
+    Fact(Person('Person1'), Eating(what=Noun('FoodNoun1', Food)('Food1'))),
 ],[
-    Fact(Person('X1'), Smelling(what=Noun('N1', Food)('F1')))
+    Fact(Person('Person1'), Smelling(what=Noun('FoodNoun1', Food)('Food1')))
 ]))

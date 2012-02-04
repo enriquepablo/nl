@@ -71,8 +71,8 @@ class cms_test(object):
         assert not nl.kb.ask(nl.Fact(c2, self.cms.Has(what=self.cms.public), self.cms.Duration(start=self.cms.Instant('now'))))
         # to the question can jane view c1?, the answer is yes
         assert nl.kb.ask(nl.Fact(jane, self.cms.Can(what=self.cms.View(what=c1)), self.cms.Duration(start=self.cms.Instant('now'))))
-        assert nl.kb.ask(nl.Fact(jane, self.cms.Can(what=self.cms.View('X1')), self.cms.Duration(start=self.cms.Instant('now'))))
-        assert nl.kb.ask(nl.Fact(self.cms.admin, self.cms.Can(what=self.cms.Publish(what='X1')), self.cms.Duration(start=self.cms.Instant('now'))))
+        assert nl.kb.ask(nl.Fact(jane, self.cms.Can(what=self.cms.View('View1')), self.cms.Duration(start=self.cms.Instant('now'))))
+        assert nl.kb.ask(nl.Fact(self.cms.admin, self.cms.Can(what=self.cms.Publish(what='Content1')), self.cms.Duration(start=self.cms.Instant('now'))))
         #assert len(nl.kb.ask(nl.Fact(self.cms.admin, self.cms.Can('X1'), self.cms.Duration(start=self.cms.Instant('now'))), nl.Fact(jane, self.cms.Can('X1'), self.cms.Duration(start=self.cms.Instant('now'))))) == 1
         # to the question can pete view c1?, the answer is no
         assert not nl.kb.ask(nl.Fact(pete, self.cms.Can(what=self.cms.View(what=c1)), self.cms.Duration(start=self.cms.Instant('now'))))
@@ -89,10 +89,10 @@ class cms_test(object):
         assert nl.kb.ask(nl.Fact(pete, self.cms.Can(what=self.cms.View(what=c1)), nl.Duration(start=nl.Instant('now'))))
 
         # what can pete view? -> c1
-        assert nl.kb.ask(self.cms.Content('X1'), nl.Fact(pete, self.cms.Can(what=self.cms.View(what='X1')), nl.Duration(start=nl.Instant('now')))) == [{'X1': 'c1'}]
+        assert nl.kb.ask(self.cms.Content('Content1'), nl.Fact(pete, self.cms.Can(what=self.cms.View(what='Content1')), nl.Duration(start=nl.Instant('now')))) == [{'Content1': 'c1'}]
 
         # who can view what?
-        assert nl.kb.ask(self.cms.Content('X1'), self.cms.Person('X2'), nl.Fact(self.cms.Person('X2'), self.cms.Can(what=self.cms.View(what='X1')), nl.Duration(start=nl.Instant('now')))) == [{'X2': 'admin', 'X1': 'c1'}, {'X2': 'john', 'X1': 'c1'}, {'X2': 'pete', 'X1': 'c1'}, {'X2': 'jane', 'X1': 'c1'}]
+        assert nl.kb.ask(self.cms.Content('Content1'), self.cms.Person('Person1'), nl.Fact(self.cms.Person('Person1'), self.cms.Can(what=self.cms.View(what='Content1')), nl.Duration(start=nl.Instant('now')))) == [{'Person1': 'admin', 'Content1': 'c1'}, {'Person1': 'john', 'Content1': 'c1'}, {'Person1': 'pete', 'Content1': 'c1'}, {'Person1': 'jane', 'Content1': 'c1'}]
 
         # c2 is private
         nl.kb.tell(nl.Fact(c2, self.cms.Has(what=self.cms.private), nl.Duration(start=nl.Instant('now'))))
@@ -100,21 +100,21 @@ class cms_test(object):
         nl.nltime.now()
 
         # who can view what?
-        assert nl.kb.ask(self.cms.Content('X1'), self.cms.Person('X2'), nl.Fact(self.cms.Person('X2'), self.cms.Can(what=self.cms.View(what='X1')), nl.Duration(start=nl.Instant('now')))) == [{'X2': 'admin', 'X1': 'c1'}, {'X2': 'john', 'X1': 'c1'}, {'X2': 'pete', 'X1': 'c1'}, {'X2': 'jane', 'X1': 'c1'}, {'X2': 'admin', 'X1': 'c2'}, {'X2': 'john', 'X1': 'c2'}]
+        assert nl.kb.ask(self.cms.Content('Content1'), self.cms.Person('Person1'), nl.Fact(self.cms.Person('Person1'), self.cms.Can(what=self.cms.View(what='Content1')), nl.Duration(start=nl.Instant('now')))) == [{'Person1': 'admin', 'Content1': 'c1'}, {'Person1': 'john', 'Content1': 'c1'}, {'Person1': 'pete', 'Content1': 'c1'}, {'Person1': 'jane', 'Content1': 'c1'}, {'Person1': 'admin', 'Content1': 'c2'}, {'Person1': 'john', 'Content1': 'c2'}]
 
         # who can hide what?
-        assert nl.kb.ask(self.cms.Content('X1'), self.cms.Person('X2'), nl.Fact(self.cms.Person('X2'), self.cms.Can(what=self.cms.Hide(what='X1')), nl.Duration(start=nl.Instant('now')))) == [{'X2': 'admin', 'X1': 'c1'}, {'X2': 'john', 'X1': 'c1'}, {'X2': 'jane', 'X1': 'c1'}]
+        assert nl.kb.ask(self.cms.Content('Content1'), self.cms.Person('Person1'), nl.Fact(self.cms.Person('Person1'), self.cms.Can(what=self.cms.Hide(what='Content1')), nl.Duration(start=nl.Instant('now')))) == [{'Person1': 'admin', 'Content1': 'c1'}, {'Person1': 'john', 'Content1': 'c1'}, {'Person1': 'jane', 'Content1': 'c1'}]
 
         # how many permissions has admin?
-        assert len(nl.kb.ask(self.cms.Permission('X2'), nl.Fact(self.cms.admin, self.cms.Has(what=self.cms.Permission('X2')), nl.Duration(start=nl.Instant('X3'))))) == 3
+        assert len(nl.kb.ask(self.cms.Permission('Permission2'), nl.Fact(self.cms.admin, self.cms.Has(what=self.cms.Permission('Permission2')), nl.Duration(start=nl.Instant('Instant3'))))) == 3
 
         # can admin view c2?
         assert nl.kb.ask(nl.Fact(self.cms.admin, self.cms.Can(what=self.cms.View(what=c2)), nl.Duration(start=nl.Instant('now'))))
 
-        assert nl.kb.ask(nl.Duration('X1'),
+        assert nl.kb.ask(nl.Duration('Duration1'),
                              nl.Fact(c2,
                                  self.cms.Has(what=self.cms.private),
-                                 nl.Duration('X1')))
+                                 nl.Duration('Duration1')))
 
         #import os
         #from nl.log import log_dir, log_file
@@ -289,8 +289,8 @@ class noun_test(object):
         nl.kb.tell(nl.Fact(john, self.n.Wants(what=self.n.Eats)))
         nl.kb.extend()
         assert nl.kb.ask(nl.Fact(john, self.n.Tries(what=self.n.Eats)))
-        assert nl.kb.ask(nl.Fact(john, self.n.Tries(what=nl.Verb('V1', self.n.Eats))))
-        assert nl.kb.ask(nl.Fact(john, self.n.Wants(what=nl.Verb('V1', self.n.Eats))), nl.Fact(john, self.n.Tries(what=nl.Verb('V1', self.n.Eats))))
+        assert nl.kb.ask(nl.Fact(john, self.n.Tries(what=nl.Verb('EatsVerb1', self.n.Eats))))
+        assert nl.kb.ask(nl.Fact(john, self.n.Wants(what=nl.Verb('EatsVerb1', self.n.Eats))), nl.Fact(john, self.n.Tries(what=nl.Verb('EatsVerb1', self.n.Eats))))
         nl.kb.tell(nl.Fact(john, self.n.Wanting(what=self.n.Eating(what=self.n.b1))))
         nl.kb.extend()
         assert nl.kb.ask(nl.Fact(john, self.n.Eating(what=self.n.b1)))

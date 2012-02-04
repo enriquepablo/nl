@@ -133,13 +133,13 @@ class Affects(Exists):
 # A qateam person with the less tickets has to review it on that server
 
 Rule([
-      Fact(Ticket('T1'), Has(what=open), Instant('I1')),
-      Not(Fact(Ticket('T1'), Has(where=Server('S1')), Instant('I1'))),
-      Fact(Person('P1'), Has(what=qateam), Instant('I1')),
-      Arith('=', Count(Fact(Person('P1'), Owns(what=Ticket('T1')), Instant('I1')))
-                 MinCount(('P2',), Fact(Person('P2'), Owns(what=Ticket('T2')), Instant('I1')))),
+      Fact(Ticket('Ticket1'), Has(what=open), Instant('Instant1')),
+      Not(Fact(Ticket('Ticket1'), Has(where=Server('Server1')), Instant('Instant1'))),
+      Fact(Person('Person1'), Has(what=qateam), Instant('Instant1')),
+      Arith('=', Count(Fact(Person('Person1'), Owns(what=Ticket('Ticket1')), Instant('Instant1')))
+                 MinCount(('Person2',), Fact(Person('Person2'), Owns(what=Ticket('Ticket2')), Instant('Instant1')))),
      ],[
-      Fact(Person('P1'), Must(do=Test(what=Ticket('T1'), where=Server('S1'))), Duration(Instant('I1'), 'now')),
+      Fact(Person('Person1'), Must(do=Test(what=Ticket('Ticket1'), where=Server('Server1'))), Duration(Instant('Instant1'), 'now')),
      ])
 
 # A ticket is open
@@ -149,12 +149,12 @@ Rule([
 # (or: I ask the boss to whom do we give the ticket -> hook a notification)
 
 Rule([
-      Fact(Ticket('T1'), Has(what=current), Instant('I1')),
-      Fact(Person('P3'), Has(what=boss), Instant('I1')),
-      Not(And(Fact(Person('P1'), Has(what=developer), Instant('I1')),
-              Fact(Person('P2'), Owns(what=Ticket('T2')), Instant('I1')))),
+      Fact(Ticket('Ticket1'), Has(what=current), Instant('Instant1')),
+      Fact(Person('Person3'), Has(what=boss), Instant('Instant1')),
+      Not(And(Fact(Person('Person1'), Has(what=developer), Instant('Instant1')),
+              Fact(Person('Person2'), Owns(what=Ticket('Ticket2')), Instant('Instant1')))),
     ],[
-      Fact(Person('P3'), Must(do=Give(what=Ticket('T1'))), Duration(Instant('I1'), 'now')),
+      Fact(Person('Person3'), Must(do=Give(what=Ticket('Ticket1'))), Duration(Instant('Instant1'), 'now')),
     ])
 
 # A server has an open ticket
@@ -166,16 +166,16 @@ Rule([
 # (or: I merge the changeset an update -> hook a script to do it and notify the boss)
 
 Rule([
-      Fact(Person('P1'), Has(what=boss), Instant('I1')),
-      Fact(Ticket('T1'), Has(what=open, where=Server('S1')), Instant('I1')),
-      Fact(Server('S1'), Has(what=Branch('B1')), Instant('I1')),
-      Fact(Ticket('T1'), Has(what=closed, where=Server('S2')), Instant('I1')),
-      Fact(Server('S2'), Has(what=Branch('B2')), Instant('I1')),
-      Fact(Changeset('X1'), Affects(what=Ticket('T1')), Instant('I1')),
-      Fact(Person('P1'), Merge(what=Changeset('X1'), where=Branch('B2')), Instant('I2')),
-      Not(Fact(Person('P1'), Merge(what=Changeset('X1'), where=Branch('B1')), Instant('I3'))),
+      Fact(Person('Person1'), Has(what=boss), Instant('Instant1')),
+      Fact(Ticket('Ticket1'), Has(what=open, where=Server('Server1')), Instant('Instant1')),
+      Fact(Server('Server1'), Has(what=Branch('Branch1')), Instant('Instant1')),
+      Fact(Ticket('Ticket1'), Has(what=closed, where=Server('Server2')), Instant('Instant1')),
+      Fact(Server('Server2'), Has(what=Branch('Branch2')), Instant('Instant1')),
+      Fact(Changeset('Changeset1'), Affects(what=Ticket('Ticket1')), Instant('Instant1')),
+      Fact(Person('Person1'), Merge(what=Changeset('Changeset1'), where=Branch('Branch2')), Instant('Instant2')),
+      Not(Fact(Person('Person1'), Merge(what=Changeset('Changeset1'), where=Branch('Branch1')), Instant('Instant2'))),
     ],[
-      Fact(Person('P1'), Must(do=Merge(what=Changeset('X1'), where=Branch('B1'))), Duration(Instant('I1'), 'now')),
+      Fact(Person('Person1'), Must(do=Merge(what=Changeset('Changeset1'), where=Branch('Branch1'))), Duration(Instant('Instant1'), 'now')),
     ])
 
 # A server has a current ticket
@@ -185,19 +185,19 @@ Rule([
 # a qateam person has to test that ticket in the first server
 
 Rule([
-      Fact(Ticket('T1'), Has(what=open, where=Server('S1')), Instant('I1')),
-      Fact(Server('S1'), Has(what=Branch('B1')), Instant('I1')),
-      Fact(Ticket('T1'), Has(what=closed, where=Server('S2')), Instant('I1')),
-      Fact(Server('S2'), Has(what=Branch('B2')), Instant('I1')),
-      Fact(Person('P1'), Has(what=boss), Instant('I1')),
-      Arith('=', Count(Fact(Person('P1'), Merge(what=Changeset('X1'), where=Branch('B1')), Instant('I3')),
-                       Fact(Changeset('X1'), Affects(what=Ticket('T1')), Instant('I3'))),
-                 Count(Fact(Person('P1'), Merge(what=Changeset('X1'), where=Branch('B2')), Instant('I3')),
-                       Fact(Changeset('X1'), Affects(what=Ticket('T1')), Instant('I3')))),
-      Fact(Person('P2'), Has(what=qateam), Instant('I1')),
-      Arith('=', Count(Fact(Person('P2'), Owns(what=Ticket('T1')), Instant('I1')))
-                 MinCount(('P3'), Fact(Person('P3'), Owns(what=Ticket('T2')), Instant('I1')))),
+      Fact(Ticket('Ticket1'), Has(what=open, where=Server('Server1')), Instant('Instant1')),
+      Fact(Server('Server1'), Has(what=Branch('Branch1')), Instant('Instant1')),
+      Fact(Ticket('Ticket1'), Has(what=closed, where=Server('Server2')), Instant('Instant1')),
+      Fact(Server('Server2'), Has(what=Branch('Branch2')), Instant('Instant1')),
+      Fact(Person('Person1'), Has(what=boss), Instant('Instant1')),
+      Arith('=', Count(Fact(Person('Person1'), Merge(what=Changeset('Changeset1'), where=Branch('Branch1')), Instant('Instant2')),
+                       Fact(Changeset('Changeset1'), Affects(what=Ticket('Ticket1')), Instant('Instant2'))),
+                 Count(Fact(Person('Person1'), Merge(what=Changeset('Changeset1'), where=Branch('Branch2')), Instant('Instant2')),
+                       Fact(Changeset('Changeset1'), Affects(what=Ticket('Ticket1')), Instant('Instant2')))),
+      Fact(Person('Person2'), Has(what=qateam), Instant('Instant1')),
+      Arith('=', Count(Fact(Person('Person2'), Owns(what=Ticket('Ticket1')), Instant('Instant1')))
+                 MinCount(('Person3'), Fact(Person('Person3'), Owns(what=Ticket('Ticket2')), Instant('Instant1')))),
      ],[
-      Fact(Person('P2'), Must(do=Test(what=Ticket('T1'), where=Server('S1'))), Duration(Instant('I1'), 'now')),
+      Fact(Person('Person2'), Must(do=Test(what=Ticket('Ticket1'), where=Server('Server1'))), Duration(Instant('Instant1'), 'now')),
      ])
 
