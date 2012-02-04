@@ -82,14 +82,16 @@ class Instant(Time, Number):
             ''' % {'parent': ancestor, 'self': num} )
         return num
 
-    def tonl(self):
+    def tonl(self, from_duration = False):
         val = str(utils.var_tonl(self))
         try:
             val = str(int(float(val)))
         except ValueError:
             pass
         if val in ('0', '-1'):
-            val = 'now'
+            return 'now'
+        if from_duration:
+            return val
         return 'at %s' % val
 
 
@@ -180,11 +182,20 @@ class Duration(Time):
             start = self.start
         except AttributeError:
             start = self.pstart
+        onwards = False
         try:
             end = self.end
+            try:
+                if int(float(end.value)) <= 0:
+                    onwards = True
+            except ValueError:
+                pass
         except AttributeError:
             end = self.pend
-        return 'from %s till %s' % (start.tonl(), end.tonl())
+        if onwards:
+            return 'from %s onwards' % (start.tonl(from_duration=True))
+        return 'from %s till %s' % (start.tonl(from_duration=True),
+                                    end.tonl(from_duration=True))
 
     def get_isc(self, queries, vrs, ancestor, mod_path):
         """
@@ -267,7 +278,12 @@ class Finish(Namable):
                                 instant or Instant(instant)
 
     def put_action(self, vrs):
-        return '(modify-instance %s (end %s))' % (self.duration.put(vrs), self.instant.put(vrs))
+        return '(modify-instance %s (end %s))' % (self.duration.put(vrs),
+                                                  self.instant.put(vrs))
+
+    def sen_tonl(self):
+        return 'endduration %s %s' % (utils.var_tonl(self.duration),
+                                      self.instant.tonl())
 
 
 class During(Namable):
@@ -296,6 +312,11 @@ class During(Namable):
        """ % {'durs': ' '.join([dur.put(vrs) for dur in self.durations]),
               'ins': self.instant.put(vrs)}
 
+    def sen_tonl(self):
+        durations = [utils.var_tonl(v) for v in self.durations]
+        return '%s during %s' % (utils.var_tonl(self.instant),
+                                 ', '.join(durations))
+
 
 class DurationOpMixin(Namable):
     '''
@@ -323,6 +344,9 @@ class Coincide(DurationOpMixin):
 )
         """ % {'durs': ' '.join([dur.put(vrs) for dur in self.durations])}
 
+    def sen_tonl(self):
+        durations = [utils.var_tonl(v) for v in self.durations]
+        return 'coincide ' + ', '.join(durations)
 
 
 class Intersection(DurationOpMixin):
@@ -340,6 +364,10 @@ class Intersection(DurationOpMixin):
                            (end (min-end %(durs)s)))
                 """ % {'durs': ' '.join([dur.put(vrs) for dur in self.durations])}
 
+    def tonl(self):
+        durations = [utils.var_tonl(v) for v in self.durations]
+        return 'intersection ' + ', '.join(durations)
+
 
 class MinComStart(DurationOpMixin):
     """
@@ -352,6 +380,13 @@ class MinComStart(DurationOpMixin):
         instants = [dur.put(vrs) for dur in self.durations]
         return '(max-start %s)' % ' '.join(instants)
 
+    def tonl(self, from_duration=False):
+        durations = [utils.var_tonl(v) for v in self.durations]
+        i = 'maxstart ' + ', '.join(durations)
+        if from_duration:
+            return i
+        return 'at ' + i
+
 
 class MaxComEnd(DurationOpMixin):
     """
@@ -363,6 +398,13 @@ class MaxComEnd(DurationOpMixin):
     def put(self, vrs):
         instants = [dur.put(vrs) for dur in self.durations]
         return '(min-end %s)' % ' '.join(instants)
+
+    def tonl(self, from_duration=False):
+        durations = [utils.var_tonl(v) for v in self.durations]
+        i = 'minend ' + ', '.join(durations)
+        if from_duration:
+            return i
+        return 'at ' + i
 
 
 class InstantOpMixin(Namable):

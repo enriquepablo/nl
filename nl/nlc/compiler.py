@@ -45,7 +45,7 @@ consecuences : consecuences SEMICOLON consecuence | consecuence
 
 consecuence : sentence | end-duration
 
-end-duration : ENDDURATION VAR
+end-duration : ENDDURATION VAR INSTANT
 """
 import re
 import nl
@@ -119,19 +119,33 @@ def p_subject(p):
 def p_time(p):
     '''time : NOW
             | AT instant
-            | FROM instant TILL instant'''
+            | FROM instant ONWARDS
+            | FROM instant TILL instant
+            | INTERSECTION durations'''
     if p[1] == 'now':
         p[0] = nl.Instant('now')
     elif p[1] == 'at':
         p[0] = nl.Instant(p[2])
     elif p[1] == 'from':
-        p[0] = nl.Duration(start=p[2], end=p[4])
+        if p[3] == 'onwards':
+            p[0] = nl.Duration(start=p[2], end='now')
+        else:
+            p[0] = nl.Duration(start=p[2], end=p[4])
+    elif p[1] == 'intersection':
+        p[0] = nl.Intersection(*p[2])
 
 def p_instant(p):
     '''instant : TIME
                | VAR
-               | NOW'''
-    p[0] = p[1]
+               | NOW
+               | MAXSTART durations
+               | MINEND durations'''
+    if p[1] == 'maxstart':
+        p[0] = nl.MinComStart(*p[2])
+    elif p[1] == 'minend':
+        p[0] = nl.MaxComEnd(*p[2])
+    else:
+        p[0] = p[1]
 
 def p_predicate(p):
     '''predicate : predication
@@ -240,8 +254,27 @@ def p_conditions(p):
         p[0] = [p[1]]
 
 def p_condition(p):
-    'condition : sentence'
+    '''condition : sentence
+               | coincidence
+               | during'''
     p[0] = p[1]
+
+def p_coincidence(p):
+    'coincidence : COINCIDE durations'
+    p[0] = nl.Coincide(*p[2])
+
+def p_durations(p):
+    '''durations : durations COMMA VAR
+                 | VAR COMMA VAR'''
+    if isinstance(p[1], list):
+        p[1].append(_from_var(p[3]))
+        p[0] = p[1]
+    else:
+        p[0] = [_from_var(p[1]), _from_var(p[3])]
+
+def p_during(p):
+    '''during : instant DURING durations'''
+    p[0] = nl.During(nl.Instant(p[1]), *p[3])
 
 def p_consecuences(p):
     '''consecuences : consecuences SEMICOLON consecuence
@@ -258,8 +291,12 @@ def p_consecuence(p):
     p[0] = p[1]
 
 def p_end_duration(p):
-    'end-duration : ENDDURATION VAR'
-    p[0] = nl.Finish(_from_var(p[2]))
+    'end-duration : ENDDURATION VAR NOW
+                  | ENDDURATION VAR AT instant'
+    if p[3] == 'now':
+        p[0] = nl.Finish(_from_var(p[2]), nl.Instant('now'))
+    else:
+        p[0] = nl.Finish(_from_var(p[2]), nl.Instant(p[4]))
 
 # Error rule for syntax errors
 def p_error(p):

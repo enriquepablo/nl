@@ -485,7 +485,7 @@ class Namable(object):
 
     def sen_tonl(self):
         return 'FromSenToNlNamable'
-    def tonl(self):
+    def tonl(self, from_duration=False):
         return 'FromNlNamable'
 
 class ArithSafeTime(Namable):

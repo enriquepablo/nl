@@ -34,6 +34,12 @@ tokens = (
     'COLON',
     'SEMICOLON',
     'ENDDURATION',
+    'COINCIDE',
+    'DURING',
+    'ONWARDS',
+    'INTERSECTION',
+    'MAXSTART',
+    'MINEND',
 )
 
 reserved = {
@@ -51,6 +57,12 @@ reserved = {
     'if': 'IF',
     'then': 'THEN',
     'endduration': 'ENDDURATION',
+    'coincide': 'COINCIDE',
+    'during': 'DURING',
+    'onwards': 'ONWARDS',
+    'intersection': 'INTERSECTION',
+    'maxstart': 'MAXSTART',
+    'minend': 'MINEND',
 }
 
 t_COMMA = r','
