@@ -6,8 +6,8 @@ eggs
 include
 lib
 parts
-nl/nl/clips
-nl/nl/history
+nl/clips
+nl/history
 *.egg-info
 *.pyc
 *.pyo
