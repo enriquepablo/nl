@@ -68,6 +68,8 @@ precedence = (
 
 def _from_var(var):
     match = VAR_PAT.match(var)
+    if match.group(2):
+        return nl.metanl.ClassVar(var, nl.utils.get_class(group(1)))
     cls = nl.utils.get_class(match.group(1))
     return cls(var)
 
@@ -141,9 +143,9 @@ def p_instant(p):
                | MAXSTART durations
                | MINEND durations'''
     if p[1] == 'maxstart':
-        p[0] = nl.MinComStart(*p[2])
+        p[0] = nl.Max_end(*p[2])
     elif p[1] == 'minend':
-        p[0] = nl.MaxComEnd(*p[2])
+        p[0] = nl.Min_end(*p[2])
     else:
         p[0] = p[1]
 

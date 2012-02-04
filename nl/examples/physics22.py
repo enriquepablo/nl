@@ -28,41 +28,33 @@ class Body(Thing): pass
 
 # verbs
 
-class HasMass(Exists):
+class Has_mass(Exists):
     subject = Thing
     mods = {'kgs': Number}
 
 
 
-class HasPosition(Exists):
+class Has_position(Exists):
+    subject = Thing
+    mods = {'x': Number,
+            'y': Number}
+
+
+class Has_speed(Exists):
     subject = Thing
     mods = {'x': Number,
             'y': Number}
 
 
 
-class EstaADistancia(Exists):
-    subject = Thing
-    mods = {'mts': Number,
-            'otro': Body}
-
-
-
-class HasSpeed(Exists):
+class Has_acceleration(Exists):
     subject = Thing
     mods = {'x': Number,
             'y': Number}
 
 
 
-class HasAcceleration(Exists):
-    subject = Thing
-    mods = {'x': Number,
-            'y': Number}
-
-
-
-class IsForced(Exists):
+class Is_forced(Exists):
     subject = Thing
     mods = {'x': Number,
             'y': Number}
@@ -73,52 +65,52 @@ class IsForced(Exists):
 
 
 r1 = Rule([
-           Fact(Body('Body1'), HasPosition(x='Number1', y='Number2'), 'Time1'),
-           Fact(Body('Body1'), HasSpeed(x='Number3', y='Number4'), 'Time1'),
+           Fact(Body('Body1'), Has_position(x='Number1', y='Number2'), 'Time1'),
+           Fact(Body('Body1'), Has_speed(x='Number3', y='Number4'), 'Time1'),
            Arith('(< Time1 %s)' % time)
            ], [
-           Fact(Body('Body1'), HasPosition(x=Number('+', arg1='Number1',
+           Fact(Body('Body1'), Has_position(x=Number('+', arg1='Number1',
                                                       arg2='Number3'),
                                         y='(+ Number2 Number4)'), '(+ Time1 1)')
            ])
 
 
 r2 = Rule([
-           Fact(Body('Body1'), HasSpeed(x='Number1', y='Number2'), 'Time1'),
-           Fact(Body('Body1'), HasAcceleration(x='Number3', y='Number4'), 'Time1'),
+           Fact(Body('Body1'), Has_speed(x='Number1', y='Number2'), 'Time1'),
+           Fact(Body('Body1'), Has_acceleration(x='Number3', y='Number4'), 'Time1'),
            Arith('(< Time1 %s)' % time)
            ], [
-           Fact(Body('Body1'), HasSpeed(x='(+ Number1 Number3)', y='(+ Number2 Number4)'), '(+ Time1 1)')
+           Fact(Body('Body1'), Has_speed(x='(+ Number1 Number3)', y='(+ Number2 Number4)'), '(+ Time1 1)')
            ])
 
 
 r3 = Rule([
-           Fact(Body('Body1'), IsForced(x='Number1', y='Number2'), 'Time1'),
-           Fact(Body('Body1'), HasMass(kgs='Number3'), 'Time1'),
+           Fact(Body('Body1'), Is_forced(x='Number1', y='Number2'), 'Time1'),
+           Fact(Body('Body1'), Has_mass(kgs='Number3'), 'Time1'),
            Arith('(< Time1 %s)' % time)
            ], [
-           Fact(Body('Body1'), HasAcceleration(x='(/ Number1 Number3)', y='(/ Number2 Number3)'), '(+ Time1 1)')
+           Fact(Body('Body1'), Has_acceleration(x='(/ Number1 Number3)', y='(/ Number2 Number3)'), '(+ Time1 1)')
            ])
 
 r4 = Rule([
-           Fact(Body('Body1'), HasPosition(x='Number1', y='Number2'), 'Time1'),
-           Fact(Body('Body1'), HasMass(kgs='Number3'), 'Time1'),
-           Fact(Body('Body2'), HasPosition(x='Number4', y='Number5'), 'Time1'),
-           Fact(Body('Body2'), HasMass(kgs='Number6'), 'Time1'),
+           Fact(Body('Body1'), Has_position(x='Number1', y='Number2'), 'Time1'),
+           Fact(Body('Body1'), Has_mass(kgs='Number3'), 'Time1'),
+           Fact(Body('Body2'), Has_position(x='Number4', y='Number5'), 'Time1'),
+           Fact(Body('Body2'), Has_mass(kgs='Number6'), 'Time1'),
            Arith('(< Time1 %s)' % time),
            Arith('(neq Body1 Body2)')
            ], [
-           Fact(Body('Body1'), IsForced(
+           Fact(Body('Body1'), Is_forced(
               x='(- 0 (/ (* (* Number3 Number6) (- Number1 Number4)) (** (+ (** (- Number1 Number4) 2) (** (- Number2 Number5) 2)) (/ 3 2))))',
               y='(- 0 (/ (* (* Number3 Number6) (- Number2 Number5)) (** (+ (** (- Number1 Number4) 2) (** (- Number2 Number5) 2)) (/ 3 2))))'),
               '(+ Time1 1)')])
 
 r5 = Rule([
-           Fact(Body('Body1'), HasMass(kgs='Number1'), 'Time3'),
+           Fact(Body('Body1'), Has_mass(kgs='Number1'), 'Time3'),
            Arith('(< Time3 %s)' % time)
            ],
            [
-           Fact(Body('Body1'), HasMass(kgs='Number1'), '(+ Time3 1)')
+           Fact(Body('Body1'), Has_mass(kgs='Number1'), '(+ Time3 1)')
            ])
 
 
@@ -131,25 +123,25 @@ c2 = Body('c2')
 
 # propositions
 
-p1 = Fact(c1, HasMass(kgs=750), 1)
+p1 = Fact(c1, Has_mass(kgs=750), 1)
 
-p2 = Fact(c2, HasMass(kgs=750), 1)
+p2 = Fact(c2, Has_mass(kgs=750), 1)
 
-p3 = Fact(c1, HasPosition(x=0, y=0), 1)
+p3 = Fact(c1, Has_position(x=0, y=0), 1)
 
-p4 = Fact(c2, HasPosition(x=0, y=100), 1)
+p4 = Fact(c2, Has_position(x=0, y=100), 1)
 
-p5 = Fact(c1, HasSpeed(x=-2, y=0), 1)
+p5 = Fact(c1, Has_speed(x=-2, y=0), 1)
 
-p6 = Fact(c2, HasSpeed(x=2, y=0), 1)
+p6 = Fact(c2, Has_speed(x=2, y=0), 1)
 
-p7 = Fact(c1, HasAcceleration(x=0, y=0), 1)
+p7 = Fact(c1, Has_acceleration(x=0, y=0), 1)
 
-p8 = Fact(c2, HasAcceleration(x=0, y=0), 1)
+p8 = Fact(c2, Has_acceleration(x=0, y=0), 1)
 
-p9 = Fact(c1, IsForced(x=0, y=0), 1)
+p9 = Fact(c1, Is_forced(x=0, y=0), 1)
 
-p10 = Fact(c2, IsForced(x=0, y=0), 1)
+p10 = Fact(c2, Is_forced(x=0, y=0), 1)
 
 for p in (c1, c2, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, r1, r2, r3, r4, r5):
     kb.tell(p)
@@ -159,11 +151,11 @@ kb.extend()
 
 def plotPh22():
     import Gnuplot
-    resp1 = kb.ask_obj(Fact(c1, HasPosition(x='X1', y='X2'), 'X3'))
-    resp2 = kb.ask_obj(Fact(c2, HasPosition(x='X1', y='X2'), 'X3'))
+    resp1 = kb.ask_obj(Fact(c1, Has_position(x='X1', y='X2'), 'X3'))
+    resp2 = kb.ask_obj(Fact(c2, Has_position(x='X1', y='X2'), 'X3'))
 
-    #resp1 = kb.ask_obj(Fact(c1, IsForced(newton='X1'), 'X2'))
-    #resp2 = kb.ask_obj(Fact(c2, IsForced(newton='X1'), 'X2'))
+    #resp1 = kb.ask_obj(Fact(c1, Is_forced(newton='X1'), 'X2'))
+    #resp2 = kb.ask_obj(Fact(c2, Is_forced(newton='X1'), 'X2'))
 
 
     line1 = [(float(p.predicate.x.value), float(p.predicate.y.value)) for p in resp1]

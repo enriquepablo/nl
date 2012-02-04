@@ -24,7 +24,7 @@ from thing import Thing
 from state import Exists
 from prop import Fact
 from nltime import (Time, Instant, Duration, Finish, During,
-                    Coincide, MinComStart, MaxComEnd,
+                    Coincide, Max_end, Min_end,
                     Intersection, now)
 from rule import Rule
 from utils import change_now

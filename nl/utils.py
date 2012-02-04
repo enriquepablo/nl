@@ -26,7 +26,8 @@ from nl.log import logger, get_history
 NAME = 'primero'
 
 # vars are always XNUM
-varpat = re.compile(r'^[A-Z]\w*\d+$')
+t_VAR = r'([A-Z][a-z_]+)(Verb|Noun)?\d+'
+varpat = re.compile(t_VAR)
 
 plugins = []
 

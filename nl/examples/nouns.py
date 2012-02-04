@@ -52,7 +52,7 @@ class Wanting(Exists):
     subject = Person
     mods = {'what': Exists}
 
-class IsCool(Exists):
+class Is_cool(Exists):
     subject = Person
 
 class Eats(Exists):

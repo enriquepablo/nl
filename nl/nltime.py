@@ -106,12 +106,12 @@ class Duration(Time):
 
     def __init__(self, var='', start=-1.0, end=-1.0):
         self.value = var
-        if isinstance(start, MinComStart):
+        if isinstance(start, Max_end):
             self.pstart = start
         else:
             self.start = isinstance(start, Instant) and start or \
                                                  Instant(start)
-        if isinstance(end, MaxComEnd):
+        if isinstance(end, Min_end):
             self.pend = end
         else:
             self.end = isinstance(end, Instant) and end or \
@@ -318,7 +318,7 @@ class During(Namable):
                                  ', '.join(durations))
 
 
-class DurationOpMixin(Namable):
+class Duration_op_mixin(Namable):
     '''
     Abstract ancestor of classes constructed with a sequence of durations
     '''
@@ -327,7 +327,7 @@ class DurationOpMixin(Namable):
           [isinstance(dur, Duration) and dur or Duration(dur) for dur in args]
 
 
-class Coincide(DurationOpMixin):
+class Coincide(Duration_op_mixin):
     '''
     given a set of durations, build a condition for a rule
     that tests whether there is an intersection between them
@@ -349,7 +349,7 @@ class Coincide(DurationOpMixin):
         return 'coincide ' + ', '.join(durations)
 
 
-class Intersection(DurationOpMixin):
+class Intersection(Duration_op_mixin):
     '''
     given a set of durations,
     put a duration that is the intersection of them all
@@ -369,7 +369,7 @@ class Intersection(DurationOpMixin):
         return 'intersection ' + ', '.join(durations)
 
 
-class MinComStart(DurationOpMixin):
+class Max_end(Duration_op_mixin):
     """
     given a set of durations, find out the minimum common instant
 
@@ -388,7 +388,7 @@ class MinComStart(DurationOpMixin):
         return 'at ' + i
 
 
-class MaxComEnd(DurationOpMixin):
+class Min_end(Duration_op_mixin):
     """
     given a set of durations, find out the maximum common instant
 
@@ -407,7 +407,7 @@ class MaxComEnd(DurationOpMixin):
         return 'at ' + i
 
 
-class InstantOpMixin(Namable):
+class Instant_op_mixin(Namable):
     '''
     Abstract ancestor of classes constructed with an instant
     '''
@@ -415,7 +415,7 @@ class InstantOpMixin(Namable):
         self.instant = instant
 
 
-class Past(InstantOpMixin):
+class Past(Instant_op_mixin):
     """
     init'd with an instant, returns true if
     the instant is in the past
@@ -425,7 +425,7 @@ class Past(InstantOpMixin):
         return '''(test (and (neq %s -1.0)
                              (< %s (python-call ptime))))''' % (i, i)
 
-class Present(InstantOpMixin):
+class Present(Instant_op_mixin):
     """
     init'd with an instant, returns true if
     the instant is the present
@@ -435,7 +435,7 @@ class Present(InstantOpMixin):
         return '''(test (or (eq %s -1.0)
                             (eq %s (python-call ptime))))''' % (i, i)
 
-class Future(InstantOpMixin):
+class Future(Instant_op_mixin):
     """
     init'd with an instant, returns true if
     the instant is in the future

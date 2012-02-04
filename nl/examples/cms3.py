@@ -19,7 +19,7 @@
 from nl.log import logger
 from nl import (Noun, Verb, Number, Thing, Exists, Fact, Rule,
                 Subword, Duration, Instant, During, Coincide,
-                Intersection, Finish, MinComStart, MaxComEnd, kb)
+                Intersection, Finish, Max_end, Min_end, kb)
 from people import Person
 from modality import Wants, Can, Must
 
@@ -135,17 +135,17 @@ class Edit(Action):
     a person can edit some content
     """
 
-class WfAction(Action):
+class Wf_action(Action):
     """
     abstract workflow action on some content
     """
 
-class Publish(WfAction):
+class Publish(Wf_action):
     """
     a person can publish some content
     """
 
-class Hide(WfAction):
+class Hide(Wf_action):
     """
     a person can hide some content
     """
@@ -210,7 +210,7 @@ r_permission(Publish, private, manage_perm)
 #        Fact(Content('C1'), Has(what=workflow), Duration('T2')),
 #        During('I1', 'T1','T2')
 #    ],[
-#        Fact(Content('C1'), Has(what=final), Duration(start=Instant('I1'), end=MaxComEnd('T1', 'T2'))),
+#        Fact(Content('C1'), Has(what=final), Duration(start=Instant('I1'), end=Min_end('T1', 'T2'))),
 #        Finish('T1', 'I1')]))
 #
 def r_workflow_for_content(content_type, workflow, context):
@@ -229,11 +229,11 @@ class Assigned(Exists):
     mods = {'to': Noun,
             'where': Context}
 
-class HasTransition(Exists):
+class Has_transition(Exists):
     subject = Workflow
     mods = {'start': Status,
             'end': Status,
-            'by': Verb} #WfAction
+            'by': Verb} #Wf_action
 
 #if some workflow has some transition,
 #and that workflow is assigned to some content type in some context,
@@ -245,14 +245,14 @@ class HasTransition(Exists):
 
 try:
   kb.tell(Rule([
-    Fact(Workflow('Workflow1'), HasTransition(start=Status('Status1'), end=Status('Status2'), by=Verb('WfActionVerb1', WfAction)), Duration('Duration1')),
+    Fact(Workflow('Workflow1'), Has_transition(start=Status('Status1'), end=Status('Status2'), by=Verb('Wf_actionVerb1', Wf_action)), Duration('Duration1')),
     Fact(Workflow('Workflow1'), Assigned(to=Noun('ContentNoun1', Content), where=Context('Context1')), Duration('Duration2')),
     Fact(Noun('ContentNoun1', Content)('Content1'), Located(where=Context('Context1')), Duration('Duration3')),
-    Fact(Person('Person1'), Verb('WfActionVerb1', WfAction)(what=Noun('ContentNoun1', Content)('Content1')), Instant('Instant1')),
+    Fact(Person('Person1'), Verb('Wf_actionVerb1', Wf_action)(what=Noun('ContentNoun1', Content)('Content1')), Instant('Instant1')),
     Fact(Noun('ContentNoun1', Content)('Content1'), Has(what=Status('Status1')), Duration('Duration4')),
     During('Instant1', 'Duration3','Duration2', 'Duration4', 'Duration1')
 ],[
-    Fact(Noun('ContentNoun1')('Content1'), Has(what=Status('Status2')), Duration(start=Instant('Instant1'), end=MaxComEnd('Duration3', 'Duration2'))),
+    Fact(Noun('ContentNoun1')('Content1'), Has(what=Status('Status2')), Duration(start=Instant('Instant1'), end=Min_end('Duration3', 'Duration2'))),
     Finish('Duration4', 'Instant1')]))
 except:
    import clips
@@ -264,7 +264,7 @@ def r_transition(action, workflow, initial, final):
     """
 
     """
-    kb.tell( Fact(workflow, HasTransition(start=initial, end=final, by=action), Duration(start='now', end='now')) )
+    kb.tell( Fact(workflow, Has_transition(start=initial, end=final, by=action), Duration(start='now', end='now')) )
 
 
 
@@ -285,7 +285,7 @@ def r_transition(action, workflow, initial, final):
 #        Fact(Noun('N1', content_type)('C1'), Has(what=initial), Duration('T3')),
 #        During('I1', 'T1','T2', 'T3')
 #    ],[
-#        Fact(Noun('N1', content_type)('C1'), Has(what=final), Duration(start=Instant('I1'), end=MaxComEnd('T1', 'T2'))),
+#        Fact(Noun('N1', content_type)('C1'), Has(what=final), Duration(start=Instant('I1'), end=Min_end('T1', 'T2'))),
 #        Finish('T3', 'I1')]))
 
 
@@ -351,7 +351,7 @@ kb.tell(Rule([
 
 # ACTION STEPS
 
-class ActionStep(Thing): pass
+class Action_step(Thing): pass
 
 class Contains(Exists):
     subject = Verb
@@ -362,10 +362,10 @@ class Contains(Exists):
 kb.tell(Rule([
     Subword(Verb('ActionVerb1'), Action),
     Fact(Person('Person1'), Verb('ActionVerb1')('Action1'), Instant('Instant1')),
-    Fact(Verb('ActionVerb1'), Contains(what=ActionStep('ActionStep1')), Duration('Duration1')),
+    Fact(Verb('ActionVerb1'), Contains(what=Action_step('Action_step1')), Duration('Duration1')),
     During('Instant1', 'Duration1')
 ],[
-    Fact(Person('Person1'), Has(what=ActionStep('ActionStep1')), Instant('Instant1')),
+    Fact(Person('Person1'), Has(what=Action_step('Action_step1')), Instant('Instant1')),
 ]))
 # except:
 #     import clips
@@ -373,10 +373,10 @@ kb.tell(Rule([
 
 
 kb.tell(Rule([
-    Fact(Thing('Thing1'), Has(what=ActionStep('ActionStep1')), Instant('Instant1')),
-    Fact(ActionStep('ActionStep1'), Has(what=ActionStep('ActionStep2')), Duration('Duration1')),
+    Fact(Thing('Thing1'), Has(what=Action_step('Action_step1')), Instant('Instant1')),
+    Fact(Action_step('Action_step1'), Has(what=Action_step('Action_step2')), Duration('Duration1')),
     During('Instant1', 'Duration1')
 ],[
-    Fact(Thing('Thing1'), Has(what=ActionStep('ActionStep2')), Instant('Instant1')),
+    Fact(Thing('Thing1'), Has(what=Action_step('Action_step2')), Instant('Instant1')),
 ]))
 

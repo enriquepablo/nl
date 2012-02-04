@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with ln.  If not, see <http://www.gnu.org/licenses/>.
 
+import re
 import uuid
 import clips
 from nl.log import logger
@@ -25,6 +26,8 @@ from nl.clps import class_constraint
 
 # marker object
 _m = []
+
+classpat = re.compile(r'^[A-Z][a-z_]+$')
 
 class Word(type):
     """
@@ -46,6 +49,8 @@ class Word(type):
             elif getattr(cls, 'cls', False):
                 return ClassVar(classname, cls.cls)
             return ClassVar(classname, utils.get_class('Namable'))
+        if not classpat.match(classname):
+            raise ValueError('')
         cls.value = ''
         return super(Word, cls).__new__(cls, classname, bases, newdict)
 
@@ -189,8 +194,6 @@ class ClassVar(object):
         return self.cls(self.value).put(vrs)
 
     def tonl(self):
-        if self.cls.__name__ != 'Namable':
-            return self.cls.__name__ + self.value
         return self.value
 
 
@@ -488,7 +491,7 @@ class Namable(object):
     def tonl(self, from_duration=False):
         return 'FromNlNamable'
 
-class ArithSafeTime(Namable):
+class Arith_safe_time(Namable):
     pass
 
 class Number(Namable):
@@ -611,7 +614,7 @@ class Arith(Number):
         return '(test (%s %s %s))' % (self.value, arg1, arg2)
 
 
-class CountMixin(Namable):
+class Count_mixin(Namable):
 
     def s_get_slot_constraint(self, vrs, fun, reorder=False):
         '''
@@ -641,7 +644,7 @@ class CountMixin(Namable):
         return '(%s %s)' % (fun, clps)
 
 
-class Count(CountMixin):
+class Count(Count_mixin):
     """
     to be used in rules wherever a number can be used, i.e.,
     as a mod in the predicate of a fact used as condition
@@ -670,7 +673,7 @@ class Count(CountMixin):
     def get_isc(self, templs, queries, vrs):
         pass
 
-class UniqueCount(CountMixin):
+class Unique_count(Count_mixin):
     """
     to be used in rules wherever a number can be used, i.e.,
     as a mod in the predicate of a fact used as condition
@@ -706,7 +709,7 @@ class UniqueCount(CountMixin):
         pass
 
 
-class MaxCount(CountMixin):
+class Max_count(Count_mixin):
     """
     to be used in rules wherever a number can be used, i.e.,
     as a mod in the predicate of a fact used as condition
@@ -731,7 +734,7 @@ class MaxCount(CountMixin):
             vrs[unique] = ()
         return self.s_get_slot_constraint(vrs, 'max-count', reorder=True)
 
-class MinCount(CountMixin):
+class Min_count(Count_mixin):
     """
     to be used in rules wherever a number can be used, i.e.,
     as a mod in the predicate of a fact used as condition
@@ -770,7 +773,7 @@ class Not(Namable):
         return '(not %s)' % self.sentence.get_ce(vrs)
 
 
-class BiConnMixin(Namable):
+class Bi_conn_mixin(Namable):
     """
     Binary connective mixin
     """
@@ -786,7 +789,7 @@ class BiConnMixin(Namable):
         return self.sentences[0].get_ce(vrs)
 
 
-class And(BiConnMixin):
+class And(Bi_conn_mixin):
     """
     Conjunction
 
@@ -797,7 +800,7 @@ class And(BiConnMixin):
         return self._get_ce(vrs)
 
 
-class Or(BiConnMixin):
+class Or(Bi_conn_mixin):
     """
     Disjunction
 

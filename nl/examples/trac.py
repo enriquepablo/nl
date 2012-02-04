@@ -137,7 +137,7 @@ Rule([
       Not(Fact(Ticket('Ticket1'), Has(where=Server('Server1')), Instant('Instant1'))),
       Fact(Person('Person1'), Has(what=qateam), Instant('Instant1')),
       Arith('=', Count(Fact(Person('Person1'), Owns(what=Ticket('Ticket1')), Instant('Instant1')))
-                 MinCount(('Person2',), Fact(Person('Person2'), Owns(what=Ticket('Ticket2')), Instant('Instant1')))),
+                 Min_count(('Person2',), Fact(Person('Person2'), Owns(what=Ticket('Ticket2')), Instant('Instant1')))),
      ],[
       Fact(Person('Person1'), Must(do=Test(what=Ticket('Ticket1'), where=Server('Server1'))), Duration(Instant('Instant1'), 'now')),
      ])
@@ -196,7 +196,7 @@ Rule([
                        Fact(Changeset('Changeset1'), Affects(what=Ticket('Ticket1')), Instant('Instant2')))),
       Fact(Person('Person2'), Has(what=qateam), Instant('Instant1')),
       Arith('=', Count(Fact(Person('Person2'), Owns(what=Ticket('Ticket1')), Instant('Instant1')))
-                 MinCount(('Person3'), Fact(Person('Person3'), Owns(what=Ticket('Ticket2')), Instant('Instant1')))),
+                 Min_count(('Person3'), Fact(Person('Person3'), Owns(what=Ticket('Ticket2')), Instant('Instant1')))),
      ],[
       Fact(Person('Person2'), Must(do=Test(what=Ticket('Ticket1'), where=Server('Server1'))), Duration(Instant('Instant1'), 'now')),
      ])

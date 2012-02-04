@@ -72,7 +72,7 @@ t_LPAREN = r'\['
 t_RPAREN = r'\]'
 t_COLON = r':'
 t_SEMICOLON = r';'
-t_VAR = r'([A-Z][a-z]+)[0-9]+'
+from nl.utils import t_VAR
 t_NUMBER = r'(\d+)'
 
 def t_SYMBOL(t):

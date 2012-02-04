@@ -17,7 +17,7 @@
 # along with ln.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from nl import kb, Exists, Thing, Fact, Rule, Instant, Duration, During, Finish, Coincide, MinComStart, MaxComEnd
+from nl import kb, Exists, Thing, Fact, Rule, Instant, Duration, During, Finish, Coincide, Max_end, Min_end
 
 # BASIC STUFF
 
@@ -47,31 +47,31 @@ class Has(Exists):
     subject = Thing
     mods = {'what': Thing}
 
-# IsNeeded is a verb that takes a Thing as a subject and a state as a modificator
-class IsNeeded(Exists):
+# Is_needed is a verb that takes a Thing as a subject and a state as a modificator
+class Is_needed(Exists):
     subject = Thing
     mods = {'for_action': Exists}
 
 # If something is needed for some state, and something else has it, that something else can be in that state
 r2 = Rule([
-        Fact(Thing('Thing1'), IsNeeded(for_action=Exists('Exists1')), Duration('Duration1')),
+        Fact(Thing('Thing1'), Is_needed(for_action=Exists('Exists1')), Duration('Duration1')),
         Fact(Person('Person1'), Has(what=Thing('Thing1')), Duration('Duration2')),
         Coincide(Duration('Duration1'), Duration('Duration2'))
         ],[
-        Fact(Thing('Person1'), Can(what=Exists('Exists1')), Duration(start=MinComStart('Duration1', 'Duration2'), end=MaxComEnd('Duration1', 'Duration2')))])
+        Fact(Thing('Person1'), Can(what=Exists('Exists1')), Duration(start=Max_end('Duration1', 'Duration2'), end=Min_end('Duration1', 'Duration2')))])
 
-# IsIn is a verb that takes a Thing as a subject and a Thing as a modificator
-class IsIn(Exists):
+# Is_in is a verb that takes a Thing as a subject and a Thing as a modificator
+class Is_in(Exists):
     subject = Thing
     mods = {'what': Thing}
 
 # if a thing is in another thing, and that another thing is in yet another, the first is in the third as well
 r3 = Rule([
-        Fact(Thing('Thing1'), IsIn(what=Thing('Thing2')), Duration('Duration1')),
-        Fact(Thing('Thing2'), IsIn(what=Thing('Thing3')), Duration('Duration2')),
+        Fact(Thing('Thing1'), Is_in(what=Thing('Thing2')), Duration('Duration1')),
+        Fact(Thing('Thing2'), Is_in(what=Thing('Thing3')), Duration('Duration2')),
         Coincide(Duration('Duration1'), Duration('Duration2'))
         ],[
-        Fact(Thing('Thing1'), IsIn(what=Thing('Thing3')), Duration(start=MinComStart('Duration1', 'Duration2'), end=MaxComEnd('Duration1', 'Duration2')))])
+        Fact(Thing('Thing1'), Is_in(what=Thing('Thing3')), Duration(start=Max_end('Duration1', 'Duration2'), end=Min_end('Duration1', 'Duration2')))])
 
 # CONTENT MANAGEMENT
 
@@ -83,11 +83,11 @@ class Permission(Thing): pass
 
 # If a person is in a group, and that group has some permission, the person also has it
 r4 = Rule([
-        Fact(Person('Person1'), IsIn(what=Group('Group1')), Duration('Duration1')),
+        Fact(Person('Person1'), Is_in(what=Group('Group1')), Duration('Duration1')),
         Fact(Group('Group1'), Has(what=Permission('Permission1')), Duration('Duration2')),
         Coincide(Duration('Duration1'), Duration('Duration2'))
         ],[
-        Fact(Person('Person1'), Has(what=Permission('Permission1')), Duration(start=MinComStart('Duration1', 'Duration2'), end=MaxComEnd('Duration1', 'Duration2')))])
+        Fact(Person('Person1'), Has(what=Permission('Permission1')), Duration(start=Max_end('Duration1', 'Duration2'), end=Min_end('Duration1', 'Duration2')))])
 
 # a role s a person
 class Role(Thing): pass
@@ -98,7 +98,7 @@ r5 = Rule([
         Fact(Role('Role1'), Has(what=Permission('Permission1')), Duration('Duration2')),
         Coincide(Duration('Duration1'), Duration('Duration2'))
         ],[
-        Fact(Person('Person1'), Has(what=Permission('Permission1')), Duration(start=MinComStart('Duration1', 'Duration2'), end=MaxComEnd('Duration1', 'Duration2')))])
+        Fact(Person('Person1'), Has(what=Permission('Permission1')), Duration(start=Max_end('Duration1', 'Duration2'), end=Min_end('Duration1', 'Duration2')))])
 
 # admin is a person
 admin = Person('admin')
@@ -139,8 +139,8 @@ class Create(Exists):
     subject = Person
     mods = {'what': Thing}
 
-# IsOwner is a verb that takes a person as subject and a content as modificator
-class IsOwner(Exists):
+# Is_owner is a verb that takes a person as subject and a content as modificator
+class Is_owner(Exists):
     subject = Person
     mods = {'of': Content}
 
@@ -168,7 +168,7 @@ r7 = Rule([
         Fact(Person('Person1'), Create(what=Content('Content1')), Instant('Instant1')),
         ],[
         Content('Content1'),
-        Fact(Person('Person1'), IsOwner(of=Content('Content1')), Duration(start=Instant('Instant1'))),
+        Fact(Person('Person1'), Is_owner(of=Content('Content1')), Duration(start=Instant('Instant1'))),
         Fact(Content('Content1'), Has(what=private), Duration(start=Instant('Instant1')))])
 
 # View is a verb that takes a person as subject and a thing as modificator.
@@ -180,21 +180,21 @@ class View(Exists):
 r12 = Rule([
         Fact(Content('Content1'), Has(what=public), Duration('Duration1'))
         ],[
-        Fact(basic_perm, IsNeeded(for_action=View(what=Content('Content1'))), Duration('Duration1'))])
+        Fact(basic_perm, Is_needed(for_action=View(what=Content('Content1'))), Duration('Duration1'))])
 
 # if some content is private, the manage_perm is needed to view it
 r13 = Rule([
         Fact(Content('Content1'), Has(what=private), Duration('Duration1'))
         ],[
-        Fact(manage_perm, IsNeeded(for_action=View(what=Content('Content1'))), Duration('Duration1'))])
+        Fact(manage_perm, Is_needed(for_action=View(what=Content('Content1'))), Duration('Duration1'))])
 
 # if someone is owner of some content that is private, she can view it
 r14 = Rule([
         Fact(Content('Content1'), Has(what=private), Duration('Duration1')),
-        Fact(Person('Person1'), IsOwner(of=Content('Content1')), Duration('Duration2')),
+        Fact(Person('Person1'), Is_owner(of=Content('Content1')), Duration('Duration2')),
         Coincide(Duration('Duration1'), Duration('Duration2'))
         ],[
-        Fact(Person('Person1'), Can(what=View(what=Content('Content1'))), Duration(start=MinComStart('Duration1', 'Duration2'), end=MaxComEnd('Duration1', 'Duration2')))])
+        Fact(Person('Person1'), Can(what=View(what=Content('Content1'))), Duration(start=Max_end('Duration1', 'Duration2'), end=Min_end('Duration1', 'Duration2')))])
 
 # Publish is a verb that takes a person as subject and some content as modificator
 class Publish(Exists):
@@ -214,7 +214,7 @@ r15 = Rule([
 r16 = Rule([
         Fact(Content('Content1'), Has(what=private), Duration('Duration1'))
         ],[
-        Fact(manage_perm, IsNeeded(for_action=Publish(what=Content('Content1'))), Duration('Duration1'))])
+        Fact(manage_perm, Is_needed(for_action=Publish(what=Content('Content1'))), Duration('Duration1'))])
 
 # Hide is a verb that takes a person as subject and a content as object
 class Hide(Exists):
@@ -232,7 +232,7 @@ r17 = Rule([
 
 # if a person is the owner of some content, she can hide it
 r18 = Rule([
-        Fact(Person('Person1'), IsOwner(of=Content('Content1')), Duration('Duration1'))
+        Fact(Person('Person1'), Is_owner(of=Content('Content1')), Duration('Duration1'))
         ],[
         Fact(Person('Person1'), Can(what=Hide(what=Content('Content1'))), Duration('Duration1'))])
 
@@ -240,7 +240,7 @@ r18 = Rule([
 r19 = Rule([
         Fact(Content('Content1'), Has(what=public), Duration('Duration1'))
         ],[
-        Fact(manage_perm, IsNeeded(for_action=Hide(what=Content('Content1'))), Duration('Duration1'))])
+        Fact(manage_perm, Is_needed(for_action=Hide(what=Content('Content1'))), Duration('Duration1'))])
 
 
 # enter everything into the database

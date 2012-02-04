@@ -48,16 +48,16 @@ class cms_test(object):
         # input everything into the db
         nl.kb.tell(john, pete, jane, c1, c2, p1, p2, p3, p4)
         # to the question is jane owner of c1?, the answer is no
-        assert not nl.kb.ask(nl.Fact(jane, self.cms.IsOwner(of=c1), self.cms.Duration(start=self.cms.Instant('now'))))
+        assert not nl.kb.ask(nl.Fact(jane, self.cms.Is_owner(of=c1), self.cms.Duration(start=self.cms.Instant('now'))))
         # extend the db
         nl.kb.extend()
         nl.nltime.now()
         # to the question is jane owner of c1?, the answer is yes
-        assert nl.kb.ask(nl.Fact(jane, self.cms.IsOwner(of=c1), self.cms.Duration(start=self.cms.Instant('now'))))
+        assert nl.kb.ask(nl.Fact(jane, self.cms.Is_owner(of=c1), self.cms.Duration(start=self.cms.Instant('now'))))
         # to the question has c1 private state?, the answer is yes
         assert nl.kb.ask(nl.Fact(c1, self.cms.Has(what=self.cms.private), self.cms.Duration(start=self.cms.Instant('now'))))
         # to the question is pete owner of c2?, the answer is no
-        assert not nl.kb.ask(nl.Fact(pete, self.cms.IsOwner(of=c2), self.cms.Duration(start=self.cms.Instant('now'))))
+        assert not nl.kb.ask(nl.Fact(pete, self.cms.Is_owner(of=c2), self.cms.Duration(start=self.cms.Instant('now'))))
         # jane wants to publish c1
         nl.kb.tell(nl.Fact(jane, self.cms.Wants(to=self.cms.Publish(what=c1)), self.cms.Instant('now')))
         # pete wants to publish c2
@@ -222,9 +222,9 @@ class cms3_test(object):
                                  self.cms.Has(what=self.cms.Status('public')),
                                  nl.Instant('now')))
 
-        main_view = self.cms.ActionStep('main_view')
-        main_edit = self.cms.ActionStep('main_edit')
-        button_edit = self.cms.ActionStep('button_edit')
+        main_view = self.cms.Action_step('main_view')
+        main_edit = self.cms.Action_step('main_edit')
+        button_edit = self.cms.Action_step('button_edit')
         nl.kb.tell(main_view, main_edit, button_edit)
 
         nl.kb.tell(nl.Fact(self.cms.Edit,
@@ -268,9 +268,9 @@ class cms3_test(object):
 #        del self.p
 #
 #    def first_test(self):
-#        fact = nl.kb.ask_obj(nl.Fact(self.p.Body('c1'), self.p.HasPosition(x='X2', y='X3'), 50))
+#        fact = nl.kb.ask_obj(nl.Fact(self.p.Body('c1'), self.p.Has_position(x='X2', y='X3'), 50))
 #        assert str(fact[0]) == 'c1 hasposition y 57.641201061 x -65.0657847679 at 50.0'
-#        resp = nl.kb.ask_obj(nl.Fact(self.p.c1, self.p.HasPosition(x='X1', y='X2'), 'X3'))
+#        resp = nl.kb.ask_obj(nl.Fact(self.p.c1, self.p.Has_position(x='X1', y='X2'), 'X3'))
 #        assert len(resp) == 100
 #
 #
