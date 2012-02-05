@@ -15,7 +15,7 @@ instant : TIME | VAR | NOW
 
 predicate : predication | VAR
 
-predication : LPAREN v_verb modification RPAREN | LPAREN v_verb RPAREN
+predication : LBRACK v_verb modification RBRACK | LBRACK v_verb RBRACK
 
 v_verb : SYMBOL | VAR
 
@@ -62,15 +62,15 @@ NUM_PAT = re.compile(t_NUMBER)
 
 precedence = (
     ('left', 'COMMA'),
-        )
+    ('left', 'LBRACK'),  )
 
 # UTILS
 
 def _from_var(var):
-    match = VAR_PAT.match(var)
-    if match.group(2):
-        return nl.metanl.ClassVar(var, nl.utils.get_class(group(1)))
-    cls = nl.utils.get_class(match.group(1))
+    m = VAR_PAT.match(var)
+    if m.group(2):
+        return nl.metanl.ClassVar(var, nl.utils.get_class(m.group(1)))
+    cls = nl.utils.get_class(m.group(1))
     return cls(var)
 
 # BNF
@@ -89,6 +89,7 @@ def p_assertion(p):
     '''statement : sentence DOT
                  | rule DOT'''
     response = nl.kb.tell(p[1])
+
     p[0] = str(response)
 
 def p_definition(p):
@@ -112,20 +113,24 @@ def p_fact(p):
 
 def p_subject(p):
     '''subject : SYMBOL
-               | VAR'''
-    if VAR_PAT.match(p[1]):
+               | VAR
+               | varvar'''
+    if isinstance(p[1], basestring) and VAR_PAT.match(p[1]):
         p[0] = _from_var(p[1])
     else:
         p[0] = p[1]
 
 def p_time(p):
     '''time : NOW
+            | VAR
             | AT instant
             | FROM instant ONWARDS
             | FROM instant TILL instant
             | INTERSECTION durations'''
     if p[1] == 'now':
         p[0] = nl.Instant('now')
+    elif VAR_PAT.match(p[1]):
+        p[0] = nl.Duration(p[1])
     elif p[1] == 'at':
         p[0] = nl.Instant(p[2])
     elif p[1] == 'from':
@@ -158,12 +163,15 @@ def p_predicate(p):
         p[0] = p[1]
 
 def p_predication(p):
-    '''predication : LPAREN v_verb modification RPAREN
-                   | LPAREN v_verb RPAREN'''
-    if p[3] == ']':
+    '''predication : LBRACK v_verb modification RBRACK
+                   | LBRACK v_verb RBRACK
+                   | varvar'''
+    if len(p) == 5:
+        p[0] = p[2](**p[3])
+    elif len(p) == 4:
         p[0] = p[2]()
     else:
-        p[0] = p[2](**p[3])
+        p[0] = p[1]
 
 def p_v_verb(p):
     '''v_verb : SYMBOL
@@ -177,12 +185,12 @@ def p_modification(p):
     '''modification : modifier COMMA modification
                     | modifier'''
     if len(p) == 4:
-        p[0] = p[1].update(p[3])
-    else:
-        p[0] = p[1]
+        p[1].update(p[3])
+    p[0] = p[1]
  
 def p_modifier(p):
-    'modifier :  SYMBOL object'
+    '''modifier :  SYMBOL object
+                | varvar'''
     p[0] = {p[1]: p[2]}
     
  
@@ -201,6 +209,12 @@ def p_object(p):
     else:
         p[0] = p[1]
 
+def p_varvar(p):
+    'varvar :  VAR LPAREN VAR RPAREN'
+    m = VAR_PAT.match(p[1])
+    cls = nl.utils.get_class(m.group(1))
+    p[0] = nl.metanl.ClassVarVar(p[1], cls, p[3])
+
 def p_def(p):
     '''definition : noun-def
                   | verb-def'''
@@ -208,7 +222,7 @@ def p_def(p):
 
 def p_noun_def(p):
     'noun-def : SYMBOL ARE SYMBOL'
-    superclass = nl.utils.get_class(p[3].capitalize())
+    superclass = nl.utils.get_class(p[3])
     metaclass = superclass.__metaclass__
     name = p[1].capitalize()
     cls = metaclass(name, bases=(superclass,), newdict={})
@@ -218,14 +232,15 @@ def p_noun_def(p):
 def p_verb_def(p):
     '''verb-def : SYMBOL IS SYMBOL WITHSUBJECT SYMBOL ANDCANBE modification-def
                 | SYMBOL IS SYMBOL WITHSUBJECT SYMBOL'''
-    superclass = nl.utils.get_class(p[3].capitalize())
+    superclass = nl.utils.get_class(p[3])
     metaclass = superclass.__metaclass__
-    nclass = nl.utils.get_class(p[5].capitalize())
+    nclass = nl.utils.get_class(p[5])
     newdict = {'subject': nclass}
     if len(p) == 8:
         newdict['mods'] = p[7]
     name = p[1].capitalize()
     vclass = metaclass(name, bases=(superclass,), newdict=newdict)
+
     nl.utils.register(name, vclass)
     p[0] = 'Verb %s defined.' % name
 
@@ -233,13 +248,12 @@ def p_modification_def(p):
     '''modification-def : mod-def COMMA modification-def
                         | mod-def'''
     if len(p) == 4:
-        p[0] = p[1].update(p[3])
-    else:
-        p[0] = p[1]
+        p[1].update(p[3])
+    p[0] = p[1]
 
 def p_mod_def(p):
     'mod-def : SYMBOL A SYMBOL'
-    obj = nl.utils.get_class(p[3].capitalize())
+    obj = nl.utils.get_class(p[3])
     p[0] = {p[1]: obj}
 
 def p_rule(p):
@@ -258,7 +272,8 @@ def p_conditions(p):
 def p_condition(p):
     '''condition : sentence
                | coincidence
-               | during'''
+               | during
+               | subword'''
     p[0] = p[1]
 
 def p_coincidence(p):
@@ -275,8 +290,27 @@ def p_durations(p):
         p[0] = [_from_var(p[1]), _from_var(p[3])]
 
 def p_during(p):
-    '''during : instant DURING durations'''
-    p[0] = nl.During(nl.Instant(p[1]), *p[3])
+    '''during : instant DURING durations
+              | instant DURING VAR'''
+    if isinstance(p[3], basestring) and VAR_PAT.match(p[3]):
+        p[0] = nl.During(nl.Instant(p[1]), nl.Duration(p[3]))
+    else:
+        p[0] = nl.During(nl.Instant(p[1]), *p[3])
+
+def p_subword(p):
+    '''subword : SYMBOL SUBWORDOF SYMBOL
+               | SYMBOL SUBWORDOF VAR
+               | VAR SUBWORDOF SYMBOL
+               | VAR SUBWORDOF VAR'''
+    if VAR_PAT.match(p[1]):
+        p1 = _from_var(p[1])
+    else:
+        p1 = nl.utils.get_class(p[1])
+    if VAR_PAT.match(p[3]):
+        p2 = _from_var(p[3])
+    else:
+        p2 = nl.utils.get_class(p[3])
+    p[0] = nl.Subword(p1, p2)
 
 def p_consecuences(p):
     '''consecuences : consecuences SEMICOLON consecuence
@@ -293,8 +327,8 @@ def p_consecuence(p):
     p[0] = p[1]
 
 def p_end_duration(p):
-    'end-duration : ENDDURATION VAR NOW
-                  | ENDDURATION VAR AT instant'
+    '''end-duration : ENDDURATION VAR NOW
+                  | ENDDURATION VAR AT instant'''
     if p[3] == 'now':
         p[0] = nl.Finish(_from_var(p[2]), nl.Instant('now'))
     else:

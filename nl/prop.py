@@ -56,7 +56,10 @@ class Fact(Namable):
                 self.subject = self.pred.subject(subj)
             else:
                 from nl import kb
-                self.subject = kb.ask_obj(Thing(subj))[0]
+                try:
+                    self.subject = kb.ask_obj(Thing(subj))[0]
+                except IndexError:
+                    self.subject = utils.get_class(subj)
                 if not self.subject:
                     raise ValueError('If Fact receives a string as subject'
                                      'It has to be a variable or a thing'

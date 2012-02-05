@@ -135,6 +135,8 @@ class Thing(Namable):
     def tonl(self):
         """
         """
+        if self.clsvar:
+            return self.clsvar
         if utils.varpat.match(self.value):
             return utils.var_tonl(self)
         return self.value

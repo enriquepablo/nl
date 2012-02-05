@@ -323,10 +323,8 @@ class ClassVarVar(object):
 
     def tonl(self):
         if self.value:
-            return self.value
-        if self.cls.__name__ != 'Namable':
-            return self.cls.__name__ + self.clsvar
-        return self.clsvar
+            return '%s(%s)' % (self.clsvar, self.value)
+        return self.ob.tonl()
 
 
 class Subword(object):
@@ -350,8 +348,10 @@ class Subword(object):
                       'sup': sup}
 
     def sen_tonl(self):
-        return '%s subwordof %s' % (getattr(self.sub, 'tonl_cls', self.sub.tonl)(),
-                                    getattr(self.sup, 'tonl_cls', self.sup.tonl)())
+        return '%s subwordof %s' % (getattr(self.sub, 'tonl_cls',
+                                            self.sub.tonl)(),
+                                    getattr(self.sup, 'tonl_cls',
+                                            self.sup.tonl)())
 
 
 class Noun(Word):

@@ -252,7 +252,7 @@ try:
     Fact(Noun('ContentNoun1', Content)('Content1'), Has(what=Status('Status1')), Duration('Duration4')),
     During('Instant1', 'Duration3','Duration2', 'Duration4', 'Duration1')
 ],[
-    Fact(Noun('ContentNoun1')('Content1'), Has(what=Status('Status2')), Duration(start=Instant('Instant1'), end=Min_end('Duration3', 'Duration2'))),
+    Fact(Noun('ContentNoun1')('Content1'), Has(what=Status('Status2')), Duration(start=Instant('Instant1'), end='now')),
     Finish('Duration4', 'Instant1')]))
 except:
    import clips

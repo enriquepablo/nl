@@ -21,8 +21,8 @@ tokens = (
     'AT',
     'FROM',
     'TILL',
-    'LPAREN',
-    'RPAREN',
+    'LBRACK',
+    'RBRACK',
     'EXTEND',
     'ARE',
     'IS',
@@ -40,6 +40,9 @@ tokens = (
     'INTERSECTION',
     'MAXSTART',
     'MINEND',
+    'LPAREN',
+    'RPAREN',
+    'SUBWORDOF',
 )
 
 reserved = {
@@ -63,17 +66,20 @@ reserved = {
     'intersection': 'INTERSECTION',
     'maxstart': 'MAXSTART',
     'minend': 'MINEND',
+    'subwordof': 'SUBWORDOF',
 }
 
 t_COMMA = r','
 t_DOT = r'\.'
 t_QMARK = r'\?'
-t_LPAREN = r'\['
-t_RPAREN = r'\]'
+t_LBRACK = r'\['
+t_RBRACK = r'\]'
 t_COLON = r':'
 t_SEMICOLON = r';'
 from nl.utils import t_VAR
 t_NUMBER = r'(\d+)'
+t_LPAREN = r'\('
+t_RPAREN = r'\)'
 
 def t_SYMBOL(t):
     r'[a-z_]+'

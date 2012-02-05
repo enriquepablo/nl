@@ -242,10 +242,11 @@ class Exists(Namable):
             if mod_o is not _m:
                 meth = getattr(mod_o, 'tonl_cls', mod_o.tonl)
                 slots.append('%s %s' % (mod, meth()))
+        v = self.clsvar or self.__class__.__name__.lower()
         if slots:
             slots = ', '.join(slots)
-            return '[%s %s]' % (self.__class__.__name__.lower(), slots)
-        return '[%s]' % self.__class__.__name__.lower()
+            return '[%s %s]' % (v, slots)
+        return '[%s]' % v
 
     def get_isc(self, queries, vrs, ancestor, mod_path):
         """
