@@ -82,7 +82,7 @@ t_LPAREN = r'\('
 t_RPAREN = r'\)'
 
 def t_SYMBOL(t):
-    r'[a-z_]+'
+    r'[a-z][a-z_]*\d*'
     t.type = reserved.get(t.value, 'SYMBOL')    # Check for reserved words
     return t
 

@@ -53,7 +53,13 @@ def register(clsname, cls):
     subclasses[clsname.lower()] = cls
 
 def get_class(cls):
-    return isinstance(cls, basestring) and subclasses[cls.lower()] or cls
+    if isinstance(cls, basestring):
+        try:
+            import nl
+            return getattr(nl, cls.capitalize())
+        except AttributeError:
+            return subclasses[cls.lower()]
+    return cls
 
 
 def clips_instance(ancestor, mod_path, meths=None):

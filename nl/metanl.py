@@ -50,7 +50,7 @@ class Word(type):
                 return ClassVar(classname, cls.cls)
             return ClassVar(classname, utils.get_class('Namable'))
         if not classpat.match(classname):
-            raise ValueError('')
+            raise ValueError('Ilegal name for class: ' + classname)
         cls.value = ''
         return super(Word, cls).__new__(cls, classname, bases, newdict)
 
