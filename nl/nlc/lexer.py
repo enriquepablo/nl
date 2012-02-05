@@ -43,6 +43,7 @@ tokens = (
     'LPAREN',
     'RPAREN',
     'SUBWORDOF',
+    'PASSTIME',
 )
 
 reserved = {
@@ -67,6 +68,7 @@ reserved = {
     'maxstart': 'MAXSTART',
     'minend': 'MINEND',
     'subwordof': 'SUBWORDOF',
+    'passtime': 'PASSTIME',
 }
 
 t_COMMA = r','

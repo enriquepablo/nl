@@ -97,10 +97,10 @@ class Fact(Namable):
         if not isinstance(instance, clips._clips_wrap.Instance):
             instance = clips.FindInstance(instance)
         s = instance.GetSlot('subject')
-        if isinstance(instance, clips._clips_wrap.Class):
-            s = Word.from_clips(s)
-        else:
+        try:
             s = Namable.from_clips(s)
+        except clips.ClipsError:
+            s = Word.from_clips(s)
         p = Exists.from_clips(instance.GetSlot('predicate'))
         t = Time.from_clips(instance.GetSlot('time'))
         truth = instance.GetSlot('truth')

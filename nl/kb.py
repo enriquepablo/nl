@@ -6,7 +6,7 @@ from nl.metanl import Namable
 from nl.thing import Thing
 from nl.prop import Fact
 from nl.rule import Rule
-
+from nl.nltime import now
 from nl.log import logger, history_dir
 from nl import utils
 
@@ -115,7 +115,7 @@ def get_symbol(sym):
     '''
     '''
     try:
-        return utils.get_class(sym.capitalize())
+        return utils.get_class(sym)
     except KeyError:
         try:
             return ask_obj(Thing(sym))[0]
@@ -137,6 +137,7 @@ def open_kb(name):
     utils.NAME = name
     # XXX wrong: this import writes into the history file,
     # that is read below, and thus is imported twice.
+    now()
     try:
         __import__('nlp.ont.' + name, globals(), locals())
     except ImportError:
@@ -152,3 +153,5 @@ def open_kb(name):
                 yacc.parse(sen)
         utils.NAME = name
         f.close()
+    extend()
+    now()

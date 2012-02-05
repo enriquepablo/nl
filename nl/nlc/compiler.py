@@ -80,10 +80,21 @@ def p_extend(p):
     response = nl.kb.extend()
     p[0] = str(response)
 
+def p_passtime(p):
+    'statement : PASSTIME DOT'
+    response = nl.now()
+    p[0] = str(response)
+
 def p_question(p):
     'statement : sentence QMARK'
-    response = nl.kb.ask(p[1])
-    p[0] = str(response)
+    response = nl.kb.ask_obj(p[1])
+    if response:
+        resp = []
+        for r in response:
+            resp.append(getattr(r, 'sen_tonl', r.tonl)())
+        p[0] = '; '.join(resp)
+    else:
+        p[0] = str(nl.kb.ask(p[1]))
 
 def p_assertion(p):
     '''statement : sentence DOT

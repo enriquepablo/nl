@@ -31,3 +31,6 @@ from utils import change_now
 
 from log import logger
 import utils
+import nltime
+import log
+from nlc.compiler import yacc

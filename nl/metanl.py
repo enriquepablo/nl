@@ -373,7 +373,8 @@ class Noun(Word):
     def __init__(cls, classname, bases, newdict):
         superclassname = bases[0].__name__
         clp = '(defclass %s (is-a %s))' % (classname, superclassname)
-        utils.to_history('%s are %s.' % (classname.lower(),
+        if classname != 'Thing':
+            utils.to_history('%s are %s.' % (classname.lower(),
                                          superclassname.lower()))
         super(Noun, cls).__init__(classname, bases, newdict, clp=clp)
 
