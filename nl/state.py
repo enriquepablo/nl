@@ -235,7 +235,7 @@ class Exists(Namable):
         put pred in clips as a make-instance action.
         """
         if self.value and utils.varpat.match(self.value):
-            return utils.var_tonl(self)
+            return '[%s]' % utils.var_tonl(self)
         slots = []
         for mod in self.mods:
             mod_o = getattr(self, mod, _m)

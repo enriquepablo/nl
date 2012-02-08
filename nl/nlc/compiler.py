@@ -174,23 +174,27 @@ def p_predicate(p):
         p[0] = p[1]
 
 def p_predication(p):
-    '''predication : LBRACK v_verb modification RBRACK
-                   | LBRACK v_verb RBRACK
-                   | varvar'''
+    '''predication : LBRACK verb modification RBRACK
+                   | LBRACK VAR modification RBRACK
+                   | LBRACK VAR VAR RBRACK
+                   | LBRACK verb RBRACK
+                   | LBRACK VAR RBRACK'''
     if len(p) == 5:
-        p[0] = p[2](**p[3])
+        if VAR_PAT.match(p[2]):
+            p[0] = _from_var(p[2])(p[3])
+        else:
+            p[0] = p[2](**p[3])
     elif len(p) == 4:
-        p[0] = p[2]()
+        if VAR_PAT.match(p[2]):
+            p[0] = _from_var(p[2])
+        else:
+            p[0] = p[2]()
     else:
         p[0] = p[1]
 
-def p_v_verb(p):
-    '''v_verb : SYMBOL
-              | VAR'''
-    if VAR_PAT.match(p[1]):
-        p[0] = _from_var(p[1])
-    else:
-        p[0] = nl.utils.get_class(p[1])
+def p_verb(p):
+    '''verb : SYMBOL'''
+    p[0] = nl.utils.get_class(p[1])
  
 def p_modification(p):
     '''modification : modifier COMMA modification
@@ -223,8 +227,8 @@ def p_object(p):
 def p_varvar(p):
     'varvar :  VAR LPAREN VAR RPAREN'
     m = VAR_PAT.match(p[1])
-    cls = nl.utils.get_class(m.group(1))
-    p[0] = nl.metanl.ClassVarVar(p[1], cls, p[3])
+    cls = nl.utils.get_class(m.group(3))
+    p[0] = nl.metanl.ClassVarVar(p[3], cls, p[1])
 
 def p_def(p):
     '''definition : noun-def

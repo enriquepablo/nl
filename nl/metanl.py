@@ -129,9 +129,9 @@ class ClassVar(object):
 
     This is not to be part of the public api
     '''
-    def __init__(self, var, cls=None):
+    def __init__(self, var, cls):
         self.value = var
-        self.cls = cls and cls or utils.get_class('Namable')
+        self.cls = cls
         self.ob = self.cls(self.value)
 
     def __call__(self, var='', **kwargs):
@@ -323,7 +323,9 @@ class ClassVarVar(object):
 
     def tonl(self):
         if self.value:
-            return '%s(%s)' % (self.clsvar, self.value)
+            if issubclass(self.cls, utils.get_class('Exists')):
+                return '[%s %s]' % (self.clsvar, self.value)
+            return '%s(%s)' % (self.value, self.clsvar)
         return self.ob.tonl()
 
 
