@@ -58,7 +58,7 @@ class Rule(Namable):
                                           ' '.join(ccons))
 
     def sen_tonl(self):
-        prems = '; '.join([sen.sen_tonl() for sen in self.prems])
-        cons = '; '.join([sen.sen_tonl() for sen in self.cons])
-        return 'if: %s; then: %s' % (prems, cons)
+        prems = ';\n    '.join([sen.sen_tonl() for sen in self.prems]).strip()
+        cons = ';\n    '.join([sen.sen_tonl() for sen in self.cons]).strip()
+        return 'if:\n    %s;\n  then:\n    %s' % (prems, cons)
 
