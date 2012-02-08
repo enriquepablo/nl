@@ -135,7 +135,7 @@ class ClassVar(object):
         self.ob = self.cls(self.value)
 
     def __call__(self, var='', **kwargs):
-        if utils.varpat.match(var):
+        if isinstance(var, basestring) and utils.varpat.match(var):
             return ClassVarVar(self.value, self.cls, var, **kwargs)
         if issubclass(self.cls, utils.get_class('Exists')):
             return self.cls(var, _clsvar=self.value, **kwargs)

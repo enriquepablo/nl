@@ -146,11 +146,15 @@ def open_kb(name):
     if os.path.isfile(history_file):
         from nl.nlc.compiler import yacc
         f = open(history_file, 'r')
-        name = utils.NAME
-        utils.NAME = ''
+        name, utils.NAME = utils.NAME, ''
+        buff = ''
         for sen in f.readlines():
-            if sen.strip():
-                yacc.parse(sen)
+            sen = sen.strip()
+            if sen and not sen.startswith('#'):
+                buff += ' ' + sen
+                if buff.endswith('.'):
+                    yacc.parse(buff)
+                    buff = ''
         utils.NAME = name
         f.close()
     extend()

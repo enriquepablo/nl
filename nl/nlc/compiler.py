@@ -13,9 +13,9 @@ time : NOW | AT instant | FROM instant TILL instant
 
 instant : TIME | VAR | NOW
 
-predicate : predication | VAR
+predicate : predicate | VAR
 
-predication : LBRACK v_verb modification RBRACK | LBRACK v_verb RBRACK
+predicate : LBRACK v_verb modification RBRACK | LBRACK v_verb RBRACK
 
 v_verb : SYMBOL | VAR
 
@@ -166,31 +166,24 @@ def p_instant(p):
         p[0] = p[1]
 
 def p_predicate(p):
-    '''predicate : predication
-                 | VAR'''
-    if issubclass(p[1].__class__, basestring) and VAR_PAT.match(p[1]):
-        p[0] = _from_var(p[1])
-    else:
-        p[0] = p[1]
-
-def p_predication(p):
-    '''predication : LBRACK verb modification RBRACK
-                   | LBRACK VAR modification RBRACK
-                   | LBRACK VAR VAR RBRACK
-                   | LBRACK verb RBRACK
-                   | LBRACK VAR RBRACK'''
+    '''predicate : LBRACK verb modification RBRACK
+                 | LBRACK VAR modification RBRACK
+                 | LBRACK VAR VAR RBRACK
+                 | LBRACK verb RBRACK
+                 | LBRACK VAR RBRACK'''
     if len(p) == 5:
-        if VAR_PAT.match(p[2]):
-            p[0] = _from_var(p[2])(p[3])
+        if isinstance(p[2], basestring) and VAR_PAT.match(p[2]):
+            if isinstance(p[3], basestring) and VAR_PAT.match(p[3]):
+                p[0] = _from_var(p[2])(p[3])
+            else:
+                p[0] = _from_var(p[2])(**p[3])
         else:
             p[0] = p[2](**p[3])
-    elif len(p) == 4:
-        if VAR_PAT.match(p[2]):
+    else:
+        if isinstance(p[2], basestring) and VAR_PAT.match(p[2]):
             p[0] = _from_var(p[2])
         else:
             p[0] = p[2]()
-    else:
-        p[0] = p[1]
 
 def p_verb(p):
     '''verb : SYMBOL'''
@@ -212,8 +205,9 @@ def p_modifier(p):
 def p_object(p):
     '''object : SYMBOL
               | NUMBER
-              | predication
-              | VAR'''
+              | VAR
+              | predicate
+              | varvar'''
     if isinstance(p[1], basestring):
         if VAR_PAT.match(p[1]):
             p[0] = _from_var(p[1])
@@ -227,7 +221,7 @@ def p_object(p):
 def p_varvar(p):
     'varvar :  VAR LPAREN VAR RPAREN'
     m = VAR_PAT.match(p[1])
-    cls = nl.utils.get_class(m.group(3))
+    cls = nl.utils.get_class(m.group(1))
     p[0] = nl.metanl.ClassVarVar(p[3], cls, p[1])
 
 def p_def(p):
