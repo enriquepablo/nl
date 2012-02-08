@@ -240,11 +240,14 @@ def p_noun_def(p):
 
 def p_verb_def(p):
     '''verb-def : SYMBOL IS SYMBOL WITHSUBJECT SYMBOL ANDCANBE modification-def
-                | SYMBOL IS SYMBOL WITHSUBJECT SYMBOL'''
+                | SYMBOL IS SYMBOL WITHSUBJECT SYMBOL
+                | SYMBOL IS SYMBOL'''
     superclass = nl.utils.get_class(p[3])
     metaclass = superclass.__metaclass__
-    nclass = nl.utils.get_class(p[5])
-    newdict = {'subject': nclass}
+    newdict = {}
+    if len(p) > 4:
+        nclass = nl.utils.get_class(p[5])
+        newdict['subject'] = nclass
     if len(p) == 8:
         newdict['mods'] = p[7]
     name = p[1].capitalize()
