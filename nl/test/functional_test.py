@@ -124,6 +124,7 @@ class cms_test(object):
 
 class cms3_test(object):
     def setup(self):
+        nl.nltime.now()
         from nl.examples import cms3
         self.cms = cms3
         nl.nltime.now()

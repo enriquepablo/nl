@@ -9,6 +9,7 @@ from nl.rule import Rule
 from nl.nltime import now
 from nl.log import logger, history_dir
 from nl import utils
+from nl.nlc.compiler import yacc
 
 
 def tell(*args):
@@ -144,7 +145,6 @@ def open_kb(name):
         pass
     history_file = os.path.join(history_dir, name + '.nl')
     if os.path.isfile(history_file):
-        from nl.nlc.compiler import yacc
         f = open(history_file, 'r')
         name, utils.NAME = utils.NAME, ''
         buff = ''
