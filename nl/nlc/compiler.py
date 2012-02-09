@@ -119,8 +119,12 @@ def p_copula(p):
     p[0] = cls(p[1])
 
 def p_fact(p):
-    'fact : subject predicate time'
-    p[0] = nl.Fact(p[1], p[2], p[3])
+    '''fact : subject predicate
+            | subject predicate time'''
+    if len(p) == 3:
+        p[0] = nl.Fact(p[1], p[2])
+    else:
+        p[0] = nl.Fact(p[1], p[2], p[3])
 
 def p_subject(p):
     '''subject : SYMBOL
