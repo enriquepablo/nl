@@ -1,51 +1,4 @@
 """
-statement : EXTEND DOT | sentence QMARK | sentence DOT | definition DOT | rule DOT
-
-sentence : fact | copula
-
-copula : SYMBOL ISA SYMBOL
-
-fact : subject predicate time
-
-subject : SYMBOL | VAR
-
-time : NOW | AT instant | FROM instant TILL instant
-
-instant : TIME | VAR | NOW
-
-predicate : predicate | VAR
-
-predicate : LBRACK v_verb modification RBRACK | LBRACK v_verb RBRACK
-
-v_verb : SYMBOL | VAR
-
-modification : modifier COMMA modification | modifier
-
-modifier :  SYMBOL object
-
-object : SYMBOL | NUMBER | pred | VAR
-
-definition : noun-def | verb-def
-
-noun-def : SYMBOL ARE SYMBOL
-
-verb-def : SYMBOL IS SYMBOL WITHSUBJECT SYMBOL ANDCANBE modification-def | SYMBOL IS SYMBOL WITHSUBJECT SYMBOL
-
-modification-def : mod-def COMMA modification-def | mod-def
-
-mod-def : SYMBOL A SYMBOL
-
-rule : IF COLON conditions SEMICOLON THEN COLON consecuences DOT
-
-conditions : conditions SEMICOLON condition | condition
-
-condition : sentence | arith-condition | durations-coincidence | instant-in-durations
-
-consecuences : consecuences SEMICOLON consecuence | consecuence
-
-consecuence : sentence | end-duration
-
-end-duration : ENDDURATION VAR INSTANT
 """
 import re
 import nl
@@ -56,6 +9,9 @@ from nl.nlc.lexer import tokens, t_VAR, t_NUMBER
 
 def shut_up_pyflakes():
     return tokens
+
+
+class CompileError(Exception): pass
 
 VAR_PAT = re.compile(t_VAR)
 NUM_PAT = re.compile(t_NUMBER)
@@ -68,9 +24,13 @@ precedence = (
 
 def _from_var(var):
     m = VAR_PAT.match(var)
+    name = m.group(1)
+    try:
+        cls = nl.utils.get_class(name)
+    except KeyError:
+        raise CompileError('invalid variable name: ' + name)
     if m.group(2):
-        return nl.metanl.ClassVar(var, nl.utils.get_class(m.group(1)))
-    cls = nl.utils.get_class(m.group(1))
+        return nl.metanl.ClassVar(var, cls)
     return cls(var)
 
 # BNF
@@ -115,23 +75,36 @@ def p_sentence(p):
 
 def p_copula(p):
     'copula : SYMBOL ISA SYMBOL'
-    cls = nl.utils.get_class(p[3].capitalize())
+    try:
+        cls = nl.utils.get_class(p[3])
+    except KeyError:
+        raise CompileError('unknown noun: %s' % sym)
     p[0] = cls(p[1])
 
 def p_fact(p):
     '''fact : subject predicate
             | subject predicate time'''
     if len(p) == 3:
-        p[0] = nl.Fact(p[1], p[2])
+        args = (p[1], p[2])
     else:
-        p[0] = nl.Fact(p[1], p[2], p[3])
+        args = (p[1], p[2], p[3])
+    try:
+        p[0] = nl.Fact(*args)
+    except ValueError, e:
+        raise CompileError(e.args[0])
 
 def p_subject(p):
     '''subject : SYMBOL
                | VAR
                | varvar'''
-    if isinstance(p[1], basestring) and VAR_PAT.match(p[1]):
-        p[0] = _from_var(p[1])
+    if isinstance(p[1], basestring):
+        if VAR_PAT.match(p[1]):
+            p[0] = _from_var(p[1])
+        else:
+            sym = nl.kb.get_symbol(p[3])
+            if isinstance(sym, basestring):
+                raise CompileError('unknown word for subject: %s' % sym)
+            p[0] = p[1]
     else:
         p[0] = p[1]
 
@@ -145,9 +118,12 @@ def p_time(p):
     if p[1] == 'now':
         p[0] = nl.Instant('now')
     elif VAR_PAT.match(p[1]):
+        var = _from_var(p[1])
+        if not isinstance(var, nl.Duration):
+            raise CompileError('invalid variable name for duration: %s' % p[1])
         p[0] = nl.Duration(p[1])
     elif p[1] == 'at':
-        p[0] = nl.Instant(p[2])
+        p[0] = p[2]
     elif p[1] == 'from':
         if p[3] == 'onwards':
             p[0] = nl.Duration(start=p[2], end='now')
@@ -167,7 +143,13 @@ def p_instant(p):
     elif p[1] == 'minend':
         p[0] = nl.Min_end(*p[2])
     else:
-        p[0] = p[1]
+        if VAR_PAT.match(p[1]):
+            var = _from_var(p[1])
+            if not isinstance(var, nl.Instant):
+                raise CompileError('invalid variable name for instant: %s' % p[1])
+            p[0] = var
+        else:
+            p[0] = nl.Instant(p[1])
 
 def p_predicate(p):
     '''predicate : LBRACK verb modification RBRACK
@@ -177,21 +159,51 @@ def p_predicate(p):
                  | LBRACK VAR RBRACK'''
     if len(p) == 5:
         if isinstance(p[2], basestring) and VAR_PAT.match(p[2]):
+            verb = _from_var(p[2])
+            if not isinstance(verb.cls, nl.Exists):
+                raise CompileError(
+                     'not a valid variable name for a verb: ' + p[2])
             if isinstance(p[3], basestring) and VAR_PAT.match(p[3]):
-                p[0] = _from_var(p[2])(p[3])
+                pred = _from_var(p[3])
+                if not isinstance(pred, nl.Exists):
+                    raise CompileError(
+                         'not a valid variable name for a predicate: ' + p[3])
+                try:
+                    p[0] = verb(p[3])
+                except ValueError, e:
+                    raise CompileError(e.args[0])
             else:
-                p[0] = _from_var(p[2])(**p[3])
+                try:
+                    p[0] = verb(**p[3])
+                except ValueError, e:
+                    raise CompileError(e.args[0])
         else:
-            p[0] = p[2](**p[3])
+            try:
+                p[0] = p[2](**p[3])
+            except ValueError, e:
+                raise CompileError(e.args[0])
     else:
         if isinstance(p[2], basestring) and VAR_PAT.match(p[2]):
-            p[0] = _from_var(p[2])
+            pred = _from_var(p[2])
+            if not isinstance(pred, nl.Exists):
+                raise CompileError(
+                     'not a valid variable name for a predicate: ' + p[2])
+            p[0] = pred
         else:
-            p[0] = p[2]()
+            try:
+                p[0] = p[2]()
+            except ValueError, e:
+                raise CompileError(e.args[0])
 
 def p_verb(p):
     '''verb : SYMBOL'''
-    p[0] = nl.utils.get_class(p[1])
+    try:
+        verb = nl.utils.get_class(p[1])
+    except KeyError:
+        raise CompileError('unknown verb: ' + p[1])
+    if not isinstance(verb, nl.Exists):
+        raise CompileError('not a verb: ' + p[1])
+    p[0] = verb
  
 def p_modification(p):
     '''modification : modifier COMMA modification
@@ -201,8 +213,7 @@ def p_modification(p):
     p[0] = p[1]
  
 def p_modifier(p):
-    '''modifier :  SYMBOL object
-                | varvar'''
+    '''modifier : SYMBOL object'''
     p[0] = {p[1]: p[2]}
     
  
@@ -218,14 +229,35 @@ def p_object(p):
         elif NUM_PAT.match(p[1]):
             p[0] = nl.Number(p[1])
         else:
-            p[0] = nl.kb.get_symbol(p[1])
+            obj = nl.kb.get_symbol(p[1])
+            if isinstance(obj, basestring):
+                raise CompileError('unknown word: ' + p[1])
+            p[0] = obj
     else:
         p[0] = p[1]
 
 def p_varvar(p):
     'varvar :  VAR LPAREN VAR RPAREN'
     m = VAR_PAT.match(p[1])
-    cls = nl.utils.get_class(m.group(1))
+    try:
+        cls = nl.utils.get_class(m.group(1))
+    except KeyError:
+        raise CompileError('invalid variable name for a proper name: ' + p[1])
+    m = VAR_PAT.match(p[3])
+    try:
+        cls = nl.utils.get_class(m.group(1))
+    except KeyError:
+        raise CompileError('invalid variable name for a noun, '
+                           'unknown symbol %s: %s' % (m.group(1).lower(), p[3]))
+    else:
+        if not issubclass(cls, nl.Thing):
+            raise CompileError('invalid variable name for a noun, '
+                               '%s are not thing: %s' % (m.group(1).lower(),
+                                                         p[3]))
+        if not m.group(2):
+            raise CompileError('invalid variable name for a noun, '
+                               '%s are not noun: %s' % (m.group(1).lower(),
+                                                         p[3]))
     p[0] = nl.metanl.ClassVarVar(p[3], cls, p[1])
 
 def p_def(p):
@@ -235,10 +267,19 @@ def p_def(p):
 
 def p_noun_def(p):
     'noun-def : SYMBOL ARE SYMBOL'
-    superclass = nl.utils.get_class(p[3])
+    try:
+        superclass = nl.utils.get_class(p[3])
+    except KeyError:
+        raise CompileError('unknown name for noun: ' + p[3])
+    else:
+        if not issubclass(superclass, nl.Thing):
+            raise CompileError('this is not a noun: ' + p[3])
     metaclass = superclass.__metaclass__
     name = p[1].capitalize()
-    cls = metaclass(name, bases=(superclass,), newdict={})
+    try:
+        cls = metaclass(name, bases=(superclass,), newdict={})
+    except ValueError:
+        raise CompileError('ilegal name for noun: ' % (p[1]))
     nl.utils.register(name, cls)
     p[0] = 'Noun %s defined.' % name
 
@@ -246,11 +287,20 @@ def p_verb_def(p):
     '''verb-def : SYMBOL IS SYMBOL WITHSUBJECT SYMBOL ANDCANBE modification-def
                 | SYMBOL IS SYMBOL WITHSUBJECT SYMBOL
                 | SYMBOL IS SYMBOL'''
-    superclass = nl.utils.get_class(p[3])
+    try:
+        superclass = nl.utils.get_class(p[3])
+    except KeyError:
+        raise CompileError('unknown name for verb: ' + p[3])
+    else:
+        if not issubclass(superclass, nl.Exists):
+            raise CompileError('this is not a verb: ' + p[3])
     metaclass = superclass.__metaclass__
     newdict = {}
     if len(p) > 4:
-        nclass = nl.utils.get_class(p[5])
+        try:
+            nclass = nl.utils.get_class(p[5])
+        except KeyError:
+            raise CompileError('unknown word for subject: ' + p[5])
         newdict['subject'] = nclass
     if len(p) == 8:
         newdict['mods'] = p[7]
@@ -269,12 +319,23 @@ def p_modification_def(p):
 
 def p_mod_def(p):
     'mod-def : SYMBOL A SYMBOL'
-    obj = nl.utils.get_class(p[3])
-    p[0] = {p[1]: obj}
+    try:
+        typ = nl.utils.get_class(p[3])
+    except KeyError:
+        raise CompileError('unknown word for modifier: ' + p[3])
+    name = nl.kb.get_symbol(p[1])
+    if not isinstance(name, basestring):
+        prev = name.__class__.__name__.lower()
+        raise CompileError('bad name for modifier, already a %s: %s' + (prev,
+                                                                        p[1]))
+    p[0] = {name: typ}
 
 def p_rule(p):
     'rule : IF COLON conditions SEMICOLON THEN COLON consecuences'
-    p[0] = nl.Rule(p[3], p[7])
+    try:
+        p[0] = nl.Rule(p[3], p[7])
+    except ValueError, e:
+        raise CompileError(e.args[0])
 
 def p_conditions(p):
     '''conditions : conditions SEMICOLON condition
@@ -300,18 +361,29 @@ def p_durations(p):
     '''durations : durations COMMA VAR
                  | VAR COMMA VAR'''
     if isinstance(p[1], list):
-        p[1].append(_from_var(p[3]))
+        newd = _from_var(p[3])
+        if not isinstance(newd, nl.Duration):
+            raise CompileError('bad name for duration variable: ' + p[3])
+        p[1].append(newd)
         p[0] = p[1]
     else:
-        p[0] = [_from_var(p[1]), _from_var(p[3])]
+        durs = {1: _from_var(p[1]), 3: _from_var(p[3])}
+        for k, d in durs.items():
+            if not isinstance(d, nl.Duration):
+                raise CompileError('bad name for duration variable: ' + p[k])
+        p[0] = durs.values()
 
 def p_during(p):
     '''during : instant DURING durations
               | instant DURING VAR'''
     if isinstance(p[3], basestring) and VAR_PAT.match(p[3]):
-        p[0] = nl.During(nl.Instant(p[1]), nl.Duration(p[3]))
+        dur = _from_var(p[3])
+        if not isinstance(dur, nl.Duration):
+            raise CompileError(
+                         'not a valid variable name for a duration: ' % p[3])
+        p[0] = nl.During(p[1], dur)
     else:
-        p[0] = nl.During(nl.Instant(p[1]), *p[3])
+        p[0] = nl.During(p[1], *p[3])
 
 def p_subword(p):
     '''subword : SYMBOL SUBWORDOF SYMBOL
@@ -321,11 +393,20 @@ def p_subword(p):
     if VAR_PAT.match(p[1]):
         p1 = _from_var(p[1])
     else:
-        p1 = nl.utils.get_class(p[1])
+        try:
+            p1 = nl.utils.get_class(p[1])
+        except KeyError:
+            raise CompileError('unknown word in variable: ' + p[1])
     if VAR_PAT.match(p[3]):
         p2 = _from_var(p[3])
     else:
-        p2 = nl.utils.get_class(p[3])
+        try:
+            p2 = nl.utils.get_class(p[2])
+        except KeyError:
+            raise CompileError('unknown word in variable: ' + p[2])
+    if not issubclass(p1.__class__, p2.__class__):
+        raise CompileError('do not be absurd, you know %s can not '
+                           'be a subword of %s' % (p[1], p[3]))
     p[0] = nl.Subword(p1, p2)
 
 def p_consecuences(p):
@@ -345,10 +426,13 @@ def p_consecuence(p):
 def p_end_duration(p):
     '''end-duration : ENDDURATION VAR NOW
                   | ENDDURATION VAR AT instant'''
+    dur = _from_var(p[2])
+    if not isinstance(dur, nl.Duration):
+        raise CompileError('not a valid variable name for a duration: ' % p[3])
     if p[3] == 'now':
-        p[0] = nl.Finish(_from_var(p[2]), nl.Instant('now'))
+        p[0] = nl.Finish(dur, nl.Instant('now'))
     else:
-        p[0] = nl.Finish(_from_var(p[2]), nl.Instant(p[4]))
+        p[0] = nl.Finish(dur, p[4])
 
 # Error rule for syntax errors
 def p_error(p):
