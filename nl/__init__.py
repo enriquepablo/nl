@@ -33,4 +33,4 @@ from log import logger
 import utils
 import nltime
 import log
-from nlc.compiler import yacc
+from nlc.compiler import yacc, CompileError

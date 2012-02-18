@@ -78,7 +78,7 @@ def p_copula(p):
     try:
         cls = nl.utils.get_class(p[3])
     except KeyError:
-        raise CompileError('unknown noun: %s' % sym)
+        raise CompileError('unknown noun: %s' % p[3])
     p[0] = cls(p[1])
 
 def p_fact(p):
@@ -101,7 +101,7 @@ def p_subject(p):
         if VAR_PAT.match(p[1]):
             p[0] = _from_var(p[1])
         else:
-            sym = nl.kb.get_symbol(p[3])
+            sym = nl.kb.get_symbol(p[1])
             if isinstance(sym, basestring):
                 raise CompileError('unknown word for subject: %s' % sym)
             p[0] = p[1]
@@ -201,7 +201,7 @@ def p_verb(p):
         verb = nl.utils.get_class(p[1])
     except KeyError:
         raise CompileError('unknown verb: ' + p[1])
-    if not isinstance(verb, nl.Exists):
+    if not issubclass(verb, nl.Exists):
         raise CompileError('not a verb: ' + p[1])
     p[0] = verb
  
