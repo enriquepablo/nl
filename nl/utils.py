@@ -23,7 +23,7 @@ import pkg_resources  # setuptools specific
 
 from nl.log import logger, get_history
 
-NAME = 'primero'
+NAME = ''
 
 # vars are always XNUM
 t_VAR = r'([A-Z][a-z_]+)(Verb|Noun|Word)?\d+'
@@ -142,3 +142,23 @@ def to_history(s):
     if NAME:
         history = get_history(NAME)
         history.info(s)
+
+def now(new=0):
+    global _now
+    if new:
+        if new < _now:
+            raise ValueError('Time cannot go backwards')
+        _now = float(new)
+    else:
+        t = float(int(time.time() * _time_granularity))
+        delta = t - _now
+        delta = delta < 1 and 1.0 or delta
+        _now = _now + _time_start_delta + delta
+    return _now
+
+def time_granularity(gr):
+    _time_granularity = gr
+
+def start_of_time(start_delta):
+    _time_start_delta = start_delta
+    now()

@@ -27,6 +27,7 @@ class cms_test(object):
         del self.cms
 
     def third_test(self):
+        nl.nltime.now()
         # john is a person
         john = self.cms.Person('john')
         # pete is a person
@@ -53,7 +54,8 @@ class cms_test(object):
         nl.kb.extend()
         nl.nltime.now()
         # to the question is jane owner of c1?, the answer is yes
-        assert nl.kb.ask(nl.Fact(jane, self.cms.Is_owner(of=c1), self.cms.Duration(start=self.cms.Instant('now'))))
+        assert not nl.kb.ask(nl.Fact(jane, self.cms.Is_owner(of=c1), self.cms.Instant('now')))
+        assert nl.kb.ask(nl.Fact(jane, self.cms.Is_owner(of=c1), self.cms.Instant('now')))
         # to the question has c1 private state?, the answer is yes
         assert nl.kb.ask(nl.Fact(c1, self.cms.Has(what=self.cms.private), self.cms.Duration(start=self.cms.Instant('now'))))
         # to the question is pete owner of c2?, the answer is no
@@ -115,6 +117,16 @@ class cms_test(object):
                              nl.Fact(c2,
                                  self.cms.Has(what=self.cms.private),
                                  nl.Duration('Duration1')))
+        # john wants to publish c1
+        nl.kb.tell(nl.Fact(john, self.cms.Wants(to=self.cms.Hide(what=c1)), self.cms.Instant('now')))
+        # extend the db
+        nl.kb.extend()
+        nl.nltime.now()
+
+        assert nl.kb.ask(nl.Fact(c1, self.cms.Has(what=self.cms.private), nl.Duration(start=nl.Instant('now'))))
+        assert not nl.kb.ask(nl.Fact(c1, self.cms.Has(what=self.cms.public), nl.Duration(start=nl.Instant('now'))))
+        # who can view what?
+        assert nl.kb.ask(self.cms.Person('Person1'), nl.Fact(self.cms.Person('Person1'), self.cms.Can(what=self.cms.View(what=c1)), nl.Instant('now'))) == [{'Person1': 'admin'}, {'Person1': 'john'}, {'Person1': 'jane'}]
 
         #import os
         #from nl.log import log_dir, log_file

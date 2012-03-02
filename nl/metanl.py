@@ -411,7 +411,7 @@ class Verb(Word):
             return
         slots = ['(slot %s (type %s) (visibility public) (pattern-match reactive))' % (mod,
             issubclass(utils.get_class(modclass), Number) and \
-                                    '?VARIABLE' or 'INSTANCE')
+                                    'NUMBER' or 'INSTANCE')
                   for mod,modclass in cls.mods.items()]
         slots = ' '.join(slots)
         clp = '(defclass %s (is-a %s) %s)' % (classname,

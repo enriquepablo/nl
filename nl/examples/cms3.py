@@ -170,7 +170,8 @@ class Required(Exists):
 #and that role has that permission,
 #all at the same time,
 #the person performs the given action
-kb.tell(Rule([
+try:
+  kb.tell(Rule([
      Fact(Permission('Permission1'), Required(to=Verb('ActionVerb1', Action), over=Status('Status1')), Duration('Duration1')),
      Fact(Person('Person1'), Wants(to=Verb('ActionVerb1', Action)(what=Content('Content1'))), Instant('Instant1')),
      Fact(Content('Content1'), Has(what=Status('Status1')), Duration('Duration5')),
@@ -180,6 +181,9 @@ kb.tell(Rule([
      During('Instant1', 'Duration1','Duration2','Duration3','Duration4', 'Duration5')
  ],[
      Fact(Person('Person1'), Verb('ActionVerb1', Action)(what=Content('Content1')), Instant('Instant1'))]))
+except:
+   logger.info(clips.ErrorStream.Read())
+   raise
 
 kb.tell( Fact(view_perm, Required(to=View, over=public), Duration(start='now', end='now')) )
 

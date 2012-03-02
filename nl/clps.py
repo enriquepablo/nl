@@ -19,7 +19,11 @@
 import clips
 from nl.log import logger
 from nl import conf
+from nl import utils
 
+
+if conf.start_time:
+    utils.now()
 
 # CLIPS SNIPPETS
 ################
@@ -30,9 +34,24 @@ class_constraint = '?%(val)s&:(or (eq (class ?%(val)s) %(cls)s) (subclassp (clas
 # CLIPS DEFINITIONS
 ###################
 
+_set_tal = '(set-sequence-operator-recognition TRUE)'
+logger.info(_set_tal)
+clips.Eval(_set_tal)
+
 _name_def = '(defclass Namable (is-a USER))'
 logger.info(_name_def)
 clips.Build(_name_def)
+
+_logger_def = '''
+(deffunction logger (?tolog)
+  (open "fromclips" file "a")
+  (printout file ?tolog)
+  (printout file crlf)
+  (close file)
+)
+'''
+logger.info(_logger_def)
+clips.Build(_logger_def)
 
 _reduce_class = '''
 (deffunction reduce-class (?instance ?class)
@@ -45,9 +64,121 @@ logger.info(_reduce_class)
 clips.Build(_reduce_class)
 
 
-_duration_clps = '(defclass Duration (is-a Namable) (slot start (type NUMBER) (pattern-match reactive)) (slot end (type NUMBER) (pattern-match reactive)))'
+_duration_clps = '''
+(defclass Duration (is-a Namable)
+    (slot start (type NUMBER)
+                (pattern-match reactive))
+    (slot end (type NUMBER)
+              (default ?NONE)
+              (pattern-match reactive))
+    (multislot children (pattern-match non-reactive)
+                        (create-accessor read)
+                        (access read-write)
+                        (override-message common-end))
+    (multislot parents (pattern-match non-reactive))
+    (multislot families (pattern-match non-reactive)))'''
 logger.info(_duration_clps)
 clips.Build(_duration_clps)
+ 
+
+
+_childduration_clps = '''
+(defclass ChildDuration (is-a USER)
+    (slot child (type INSTANCE)
+                (pattern-match non-reactive))
+    (slot family (type SYMBOL)
+              (pattern-match non-reactive)))'''
+logger.info(_childduration_clps)
+clips.Build(_childduration_clps)
+
+
+_finishchildfun_clp = '''
+(deffunction finish-child-end (?duration ?instant ?family)
+    (bind ?families (delete-member$ (send ?duration get-families) ?family))
+    (send ?duration put-families ?families)
+    (if (and (= (send ?duration get-end) -1.0)
+             (= (length$ (send ?duration get-families)) 0))
+       then
+        (send ?duration put-end ?instant)
+        (progn$ (?child (send ?duration get-children))
+          (finish-child-end (send ?child get-child) ?instant (send ?child get-family))
+        )
+        (modify-instance ?duration (children (create$))))
+)
+'''
+logger.info(_finishchildfun_clp)
+clips.Build(_finishchildfun_clp)
+
+
+_finishfun_clp = '''
+(deffunction finish-end (?duration ?instant)
+    (if (= (send ?duration get-end) -1.0)
+       then
+        (send ?duration put-end ?instant)
+        (progn$ (?child (send ?duration get-children))
+          (finish-child-end (send ?child get-child) ?instant (send ?child get-family))
+        )
+        (modify-instance ?duration (children (create$))))
+)
+'''
+logger.info(_finishfun_clp)
+clips.Build(_finishfun_clp)
+
+
+_commend_clp = '''
+(defmessage-handler Duration common-end primary ($?durations)
+    (bind ?end (send (nth$ 1 ?durations) get-end))
+    (bind ?now (python-call ptime))
+    (if (= ?end -1.0) then (bind ?end ?now))
+    (progn$ (?dur (rest$ ?durations))
+        (bind ?this-end (send ?dur get-end))
+        (if (= ?this-end -1.0) then (bind ?this-end ?now))
+        (if (< ?this-end ?end)
+            then (bind ?end ?this-end))
+    )
+    (if (= ?end ?now)
+     then (bind ?end -1.0))
+    (bind ?family (gensym*))
+    
+    (bind ?new-child (make-instance of ChildDuration (child ?self) (family ?family)))
+    (bind ?self:parents (create$))
+    (bind ?familiar FALSE)
+    (progn$ (?dur ?durations)
+         (if (= (send ?dur get-end) ?end)
+          then 
+               (bind ?children (send ?dur get-children))
+               (modify-instance ?dur (children (create$ ?new-child $?children)))
+               (bind ?parents ?self:parents)
+               (bind ?self:parents (create$ ?dur $?parents))
+               (bind ?familiar TRUE)
+          ))
+    (if (eq ?familiar TRUE) then (bind ?self:families (create$ ?family)))
+    (bind ?self:end ?end)
+)
+'''
+logger.info(_commend_clp)
+try:
+  clips.Build(_commend_clp)
+except:
+    logger.error(clips.ErrorStream.Read())
+    raise
+
+_makedur_clp = '''
+(deffunction make-duration (?duration)
+    (bind ?family (gensym*))
+    (bind ?new-dur (duplicate-instance ?duration))
+    (modify-instance ?new-dur (children (create$)))
+    (bind ?new-child (make-instance of ChildDuration (child ?new-dur) (family ?family)))
+    (bind ?children (send ?duration get-children))
+    (modify-instance ?duration (children (create$ ?new-child $?children)))
+    (modify-instance ?new-dur (parents (create$ ?duration))
+                              (families (create$ ?family)))
+    (return ?new-dur)
+)
+'''
+logger.info(_makedur_clp)
+clips.Build(_makedur_clp)
+
 
 _minend_clp = '''
 (deffunction min-end ($?durations)
@@ -60,7 +191,6 @@ _minend_clp = '''
         (if (< ?this-end ?end)
             then (bind ?end ?this-end))
     )
-    (if (= ?end ?now) then (bind ?end -1.0))
     (return ?end)
 )
 '''
@@ -84,10 +214,6 @@ clips.Build(_maxstart_clp)
 clp = '(defclass Exists (is-a USER))'
 logger.info(clp)
 clips.Build(clp)
-
-_set_tal = '(set-sequence-operator-recognition TRUE)'
-logger.info(_set_tal)
-clips.Eval(_set_tal)
 
 _set_slots = """(defmessage-handler Exists set-slots primary ($?slots)
         (while (> (length$ ?slots) 0) do
@@ -153,52 +279,36 @@ _add_prop = '''
                                         (or (= (send (send ?prop get-time) get-end) (send ?t get-end))
                                             (and (= (send (send ?prop get-time) get-end) -1.0)
                                                 (>= (python-call ptime) (send ?t get-end)))
-                                            (and (= (send ?t get-end) -1.0)
-                                                (<= (python-call ptime) (send (send ?prop get-time) get-end)))
                                             (and (<> (send ?t get-end) -1.0)
                                                 (>= (send (send ?prop get-time) get-end) (send ?t get-end)))))
                                    (eq ?prop:time ?t))
                                (= ?prop:truth ?r))
-               (bind ?count (+ ?count 1)))
+               (bind ?count (+ ?count 1))
+               (bind ?dur (send ?prop get-time))
+               (if (eq (class ?dur) Duration)
+                then (bind ?family (first$ (send ?t get-families)))
+                     (send ?dur put-families (create$ ?family (send ?dur get-families)))
+                     (bind ?new-child (make-instance of ChildDuration (child ?dur)
+                                                                      (family ?family)))
+                     (progn$ (?parent (send ?t get-parents))
+                             (slot-replace$ ?parent children 1 1 ?new-child)
+                             ))
+        )
         (if (= ?count 0)
-            then (delayed-do-for-all-instances ((?prop Fact))
-                          (and (eq ?prop:subject ?s)
-                               (eq ?prop:predicate ?p)
-                               (or (and (eq (class ?t) Duration)
-                                        (eq (class (send ?prop get-time)) Duration)
-                                        (<= (send ?t get-start) (send (send ?prop get-time) get-start))
-                                        (or (= (send (send ?prop get-time) get-end) (send ?t get-end))
-                                            (and (= (send ?t get-end) -1.0)
-                                                (>= (python-call ptime) (send (send ?prop get-time) get-end)))
-                                            (and (= (send (send ?prop get-time) get-end) -1.0)
-                                                (<= (python-call ptime) (send (send ?prop get-time) get-end)))
-                                            (and (<> (send (send ?prop get-time) get-end) -1.0)
-                                                (>= (send ?t get-end) (send (send ?prop get-time) get-end)))))
-                                   (eq ?prop:time ?t))
-                               (= ?prop:truth ?r))
-                        (send ?prop delete))
+            then (if (eq (class ?t) Duration)
+                  then (send ?t put-parents (create$)))
                  (make-instance of Fact (subject ?s)
-                                           (predicate ?p)
-                                           (time ?t)
-                                           (truth ?r))
-             %s
-        else (return TRUE)))''' % callback
+                                        (predicate ?p)
+                                        (time ?t)
+                                        (truth ?r)))
+             %s)''' % callback
 
 logger.info(_add_prop)
-clips.Build(_add_prop)
-
-_resolvetime = '''
-(deffunction resolvetime (?t)
-    (if (eq ?t -1.0)
-        then (return (python-call ptime))
-        else (return ?t)
-    )
-)
-'''
-
-logger.info(_resolvetime)
-clips.Build(_resolvetime)
-
+try:
+    clips.Build(_add_prop)
+except:
+    logger.error(clips.ErrorStream.Read())
+    raise
 
 _count_sentences = '''
 (deffunction count-sentences ($?sentences)

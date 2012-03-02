@@ -27,7 +27,11 @@ def tell(*args):
                 logger.error(clips.ErrorStream.Read())
                 raise
         else:
-            clips.Eval(s)
+            try:
+                clips.Eval(s)
+            except:
+                logger.error(clips.ErrorStream.Read())
+                raise
         sen = sentence.sen_tonl()
         if sen:
             utils.to_history(sen + '.')

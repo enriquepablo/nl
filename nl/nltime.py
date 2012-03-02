@@ -21,6 +21,7 @@ import datetime
 import clips
 from nl.log import logger
 from nl import utils
+from nl.utils import now
 from nl.metanl import Namable, Number
 
 _m = []
@@ -165,15 +166,26 @@ class Duration(Time):
                 constraint += '&:(eq (send ?%s get-%s) %s)' % (newvar, x, x_constraint)
         return constraint
 
-    def put(self, vrs):
+    def put(self, vrs, make=True):
         if utils.varpat.match(self.value):
-            return self.put_var(vrs)
+            inst = self.put_var(vrs)
+            if make:
+                return '(make-duration %s)' % inst
+            else:
+                return inst
         else:
-            return '(make-instance of Duration (start %s) (end %s))' % \
-                (getattr(self, 'pstart', False) and self.pstart.put(vrs) or \
-                                           self.start.get_slot_constraint(vrs),
-                 getattr(self, 'pend', False) and self.pend.put(vrs) or \
-                                           self.end.get_slot_constraint(vrs))
+            e = 'end'
+            if getattr(self, 'pstart', False):
+                start = self.pstart.put(vrs)
+            else:
+                start = self.start.get_slot_constraint(vrs)
+            if getattr(self, 'pend', False):
+                end = self.pend.put(vrs)
+                e = 'children'
+            else:
+                end = self.end.get_slot_constraint(vrs)
+            return '(make-instance of Duration (start %s) (%s %s))' % \
+                (start, e, end)
 
     def tonl(self):
         if utils.varpat.match(self.value):
@@ -220,18 +232,16 @@ class Duration(Time):
         nstart = start.get_isc([], vrs, ancestor, mod_path)
         end = getattr(self, 'end', _m)
         if utils.varpat.match(str(end.value)) and not vrs.has_key(end.value):
-            vrs[end.value] = (ancestor, mod_path+('end',))
+            vrs[end.value] = (ancestor, mod_path + ('end',))
         nend = end.get_isc([], vrs, ancestor, mod_path)
         queries.append( '''
                    (and (eq (class (send ?%(parent)s get-time)) Duration)
                         (<= (send (send ?%(parent)s get-time) get-start) %(start)s)
                         (or (= (send (send ?%(parent)s get-time) get-end) %(end)s)
-                            (and (= (send (send ?%(parent)s get-time) get-end) -1.0)
-                                 (>= (python-call ptime) %(end)s))
                             (and (= %(end)s -1.0)
-                                 (<= (python-call ptime) (send (send ?%(parent)s get-time) get-end)))
+                                 (>= (send (send ?%(parent)s get-time) get-end) (python-call ptime)))
                             (and (<> %(end)s -1.0)
-                                 (>= (send (send ?%(parent)s get-time) get-end) %(end)s))))
+                                 (> (send (send ?%(parent)s get-time) get-end) %(end)s))))
             ''' % {'parent': ancestor, 'start': nstart, 'end': nend} )
 
     def get_ism(self,  templs, queries, vrs, newvar='time'):
@@ -278,7 +288,7 @@ class Finish(Namable):
                                 instant or Instant(instant)
 
     def put_action(self, vrs):
-        return '(modify-instance %s (end %s))' % (self.duration.put(vrs),
+        return '(finish-end %s %s)' % (self.duration.put(vrs, make=False),
                                                   self.instant.put(vrs))
 
     def sen_tonl(self):
@@ -305,11 +315,8 @@ class During(Namable):
 (test
   (and
    (<= (max-start %(durs)s) %(ins)s)
-   (or
-     (and (= (min-end %(durs)s) -1.0)
-          (>= (python-call ptime) %(ins)s))
-     (>= (min-end %(durs)s) %(ins)s))))
-       """ % {'durs': ' '.join([dur.put(vrs) for dur in self.durations]),
+   (>= (min-end %(durs)s) %(ins)s)))
+       """ % {'durs': ' '.join([dur.put(vrs, make=False) for dur in self.durations]),
               'ins': self.instant.put(vrs)}
 
     def sen_tonl(self):
@@ -336,13 +343,9 @@ class Coincide(Duration_op_mixin):
     def get_ce(self, vrs):
         return """
 (test
-  (or
     (<= (max-start %(durs)s) (min-end %(durs)s))
-    (and
-      (<= (max-start %(durs)s) (python-call ptime))
-      (= (min-end %(durs)s) -1.0)))
 )
-        """ % {'durs': ' '.join([dur.put(vrs) for dur in self.durations])}
+        """ % {'durs': ' '.join([dur.put(vrs, make=False) for dur in self.durations])}
 
     def sen_tonl(self):
         durations = [utils.var_tonl(v) for v in self.durations]
@@ -361,8 +364,8 @@ class Intersection(Duration_op_mixin):
     def put(self, vrs):
         return """
 (make-instance of Duration (start (max-start %(durs)s))
-                           (end (min-end %(durs)s)))
-                """ % {'durs': ' '.join([dur.put(vrs) for dur in self.durations])}
+                           (children (create$ %(durs)s)))
+                """ % {'durs': ' '.join([dur.put(vrs, make=False) for dur in self.durations])}
 
     def tonl(self):
         durations = [utils.var_tonl(v) for v in self.durations]
@@ -377,8 +380,8 @@ class Max_end(Duration_op_mixin):
     """
 
     def put(self, vrs):
-        instants = [dur.put(vrs) for dur in self.durations]
-        return '(max-start %s)' % ' '.join(instants)
+        durations = [dur.put(vrs, make=False) for dur in self.durations]
+        return '(max-start %s)' % ' '.join(durations)
 
     def tonl(self, from_duration=False):
         durations = [utils.var_tonl(v) for v in self.durations]
@@ -396,11 +399,11 @@ class Min_end(Duration_op_mixin):
     """
 
     def put(self, vrs):
-        instants = [dur.put(vrs) for dur in self.durations]
-        return '(min-end %s)' % ' '.join(instants)
+        durations = [dur.put(vrs, make=False) for dur in self.durations]
+        return '%s' % ' '.join(durations)
 
     def tonl(self, from_duration=False):
-        durations = [utils.var_tonl(v) for v in self.durations]
+        durations = [utils.var_tonl(d) for d in self.durations]
         i = 'minend ' + ', '.join(durations)
         if from_duration:
             return i
@@ -443,26 +446,6 @@ class Future(Instant_op_mixin):
     def get_ce(vrs):
         i = self.instant.put(vrs)
         return '''(test (> %s (python-call ptime)))''' % (i, i)
-
-
-def now(new=0):
-    if new:
-        if new < utils._now:
-            raise ValueError('Time cannot go backwards')
-        utils._now = float(new)
-    else:
-        t = float(int(time.time() * utils._time_granularity))
-        delta = t - utils._now
-        delta = delta < 1 and 1.0 or delta
-        utils._now = utils._now + utils._time_start_delta + delta
-    return utils._now
-
-def time_granularity(gr):
-    utils._time_granularity = gr
-
-def start_of_time(start_delta):
-    utils._time_start_delta = start_delta
-    now()
 
 def ptime():
     return clips.Float(utils._now)

@@ -21,6 +21,8 @@ debug_level = 'INFO'
 
 with_callback = True
 
+start_time = True
+
 here = os.path.join(os.path.dirname(__file__))
 # HISTORY_DIR = ''
 
