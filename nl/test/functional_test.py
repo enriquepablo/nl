@@ -28,6 +28,7 @@ class cms_test(object):
 
     def third_test(self):
         nl.nltime.now()
+        nl.clips.Eval('(dribble-on "clipstrace")')
         # john is a person
         john = self.cms.Person('john')
         # pete is a person
@@ -54,8 +55,7 @@ class cms_test(object):
         nl.kb.extend()
         nl.nltime.now()
         # to the question is jane owner of c1?, the answer is yes
-        assert not nl.kb.ask(nl.Fact(jane, self.cms.Is_owner(of=c1), self.cms.Instant('now')))
-        assert nl.kb.ask(nl.Fact(jane, self.cms.Is_owner(of=c1), self.cms.Instant('now')))
+        assert nl.kb.ask(nl.Fact(jane, self.cms.Is_owner(of=c1), self.cms.Duration(start=self.cms.Instant('now'))))
         # to the question has c1 private state?, the answer is yes
         assert nl.kb.ask(nl.Fact(c1, self.cms.Has(what=self.cms.private), self.cms.Duration(start=self.cms.Instant('now'))))
         # to the question is pete owner of c2?, the answer is no
@@ -128,6 +128,7 @@ class cms_test(object):
         # who can view what?
         assert nl.kb.ask(self.cms.Person('Person1'), nl.Fact(self.cms.Person('Person1'), self.cms.Can(what=self.cms.View(what=c1)), nl.Instant('now'))) == [{'Person1': 'admin'}, {'Person1': 'john'}, {'Person1': 'jane'}]
 
+        nl.clips.Eval('(dribble-off)')
         #import os
         #from nl.log import log_dir, log_file
         #os.remove(log_file)

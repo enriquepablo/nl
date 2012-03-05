@@ -38,6 +38,7 @@ _set_tal = '(set-sequence-operator-recognition TRUE)'
 logger.info(_set_tal)
 clips.Eval(_set_tal)
 
+
 _name_def = '(defclass Namable (is-a USER))'
 logger.info(_name_def)
 clips.Build(_name_def)
@@ -69,10 +70,11 @@ _duration_clps = '''
     (slot start (type NUMBER)
                 (pattern-match reactive))
     (slot end (type NUMBER)
-              (default ?NONE)
-              (pattern-match reactive))
+              (pattern-match reactive)
+              (create-accessor read-write)
+              (access read-write))
     (multislot children (pattern-match non-reactive)
-                        (create-accessor read)
+                        (create-accessor read-write)
                         (access read-write)
                         (override-message common-end))
     (multislot parents (pattern-match non-reactive))
@@ -81,9 +83,9 @@ logger.info(_duration_clps)
 clips.Build(_duration_clps)
  
 
-
 _childduration_clps = '''
 (defclass ChildDuration (is-a USER)
+    (pattern-match non-reactive)
     (slot child (type INSTANCE)
                 (pattern-match non-reactive))
     (slot family (type SYMBOL)
@@ -103,7 +105,8 @@ _finishchildfun_clp = '''
         (progn$ (?child (send ?duration get-children))
           (finish-child-end (send ?child get-child) ?instant (send ?child get-family))
         )
-        (modify-instance ?duration (children (create$))))
+        (send ?duration put-children (create$)))
+    (return TRUE)
 )
 '''
 logger.info(_finishchildfun_clp)
@@ -118,7 +121,8 @@ _finishfun_clp = '''
         (progn$ (?child (send ?duration get-children))
           (finish-child-end (send ?child get-child) ?instant (send ?child get-family))
         )
-        (modify-instance ?duration (children (create$))))
+        (send ?duration put-children (create$)))
+    (return TRUE)
 )
 '''
 logger.info(_finishfun_clp)
@@ -147,7 +151,7 @@ _commend_clp = '''
          (if (= (send ?dur get-end) ?end)
           then 
                (bind ?children (send ?dur get-children))
-               (modify-instance ?dur (children (create$ ?new-child $?children)))
+               (send ?dur put-children (create$ ?new-child $?children))
                (bind ?parents ?self:parents)
                (bind ?self:parents (create$ ?dur $?parents))
                (bind ?familiar TRUE)
@@ -166,14 +170,14 @@ except:
 _makedur_clp = '''
 (deffunction make-duration (?duration)
     (bind ?family (gensym*))
-    (bind ?new-dur (duplicate-instance ?duration))
-    (modify-instance ?new-dur (children (create$)))
-    (bind ?new-child (make-instance of ChildDuration (child ?new-dur) (family ?family)))
+    (bind ?newdur (duplicate-instance ?duration))
+    (send ?newdur put-children (create$))
+    (bind ?newchild (make-instance of ChildDuration (child ?newdur) (family ?family)))
     (bind ?children (send ?duration get-children))
-    (modify-instance ?duration (children (create$ ?new-child $?children)))
-    (modify-instance ?new-dur (parents (create$ ?duration))
+    (send ?duration put-children (create$ ?newchild $?children))
+    (modify-instance ?newdur (parents (create$ ?duration))
                               (families (create$ ?family)))
-    (return ?new-dur)
+    (return ?newdur)
 )
 '''
 logger.info(_makedur_clp)
@@ -288,10 +292,11 @@ _add_prop = '''
                (if (eq (class ?dur) Duration)
                 then (bind ?family (first$ (send ?t get-families)))
                      (send ?dur put-families (create$ ?family (send ?dur get-families)))
-                     (bind ?new-child (make-instance of ChildDuration (child ?dur)
-                                                                      (family ?family)))
+                     (bind ?newchild (make-instance of ChildDuration (child ?dur)
+                                                                     (family ?family)))
                      (progn$ (?parent (send ?t get-parents))
-                             (slot-replace$ ?parent children 1 1 ?new-child)
+                             (bind ?children (send ?parent get-children))
+                             (send ?parent put-children (create$ ?newchild $?children))
                              ))
         )
         (if (= ?count 0)
