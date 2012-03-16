@@ -46,7 +46,7 @@ def p_passtime(p):
     p[0] = str(response)
 
 def p_question(p):
-    'statement : sentence QMARK'
+    'statement : fact QMARK'
     response = nl.kb.ask_obj(p[1])
     if response:
         resp = []
@@ -57,7 +57,7 @@ def p_question(p):
         p[0] = str(nl.kb.ask(p[1]))
 
 def p_assertion(p):
-    '''statement : sentence DOT
+    '''statement : fact DOT
                  | rule DOT'''
     response = nl.kb.tell(p[1])
 
@@ -67,19 +67,6 @@ def p_definition(p):
     'statement : definition DOT'
     response = p[1]
     p[0] = str(response)
-
-def p_sentence(p):
-    '''sentence : fact
-                | copula'''
-    p[0] = p[1]
-
-def p_copula(p):
-    'copula : SYMBOL ISA SYMBOL'
-    try:
-        cls = nl.utils.get_class(p[3])
-    except KeyError:
-        raise CompileError('unknown noun: %s' % p[3])
-    p[0] = cls(p[1])
 
 def p_fact(p):
     '''fact : subject predicate
@@ -262,6 +249,7 @@ def p_varvar(p):
 
 def p_def(p):
     '''definition : noun-def
+                  | name-def
                   | verb-def'''
     p[0] = p[1]
 
@@ -283,9 +271,18 @@ def p_noun_def(p):
     nl.utils.register(name, cls)
     p[0] = 'Noun %s defined.' % name
 
+def p_name_def(p):
+    'name-def : SYMBOL ISA SYMBOL'
+    try:
+        cls = nl.utils.get_class(p[3])
+    except KeyError:
+        raise CompileError('unknown noun: %s' % p[3])
+    p[0] = cls(p[1])
+
 def p_verb_def(p):
     '''verb-def : SYMBOL IS SYMBOL WITHSUBJECT SYMBOL ANDCANBE modification-def
                 | SYMBOL IS SYMBOL WITHSUBJECT SYMBOL
+                | SYMBOL IS SYMBOL ANDCANBE modification-def
                 | SYMBOL IS SYMBOL'''
     try:
         superclass = nl.utils.get_class(p[3])
@@ -296,12 +293,14 @@ def p_verb_def(p):
             raise CompileError('this is not a verb: ' + p[3])
     metaclass = superclass.__metaclass__
     newdict = {}
-    if len(p) > 4:
+    if len(p) > 4 and p[4] != 'andcanbe':
         try:
             nclass = nl.utils.get_class(p[5])
         except KeyError:
             raise CompileError('unknown word for subject: ' + p[5])
         newdict['subject'] = nclass
+    if len(p) == 6 and p[4] == 'andcanbe':
+        newdict['mods'] = p[5]
     if len(p) == 8:
         newdict['mods'] = p[7]
     name = p[1].capitalize()
@@ -347,10 +346,11 @@ def p_conditions(p):
         p[0] = [p[1]]
 
 def p_condition(p):
-    '''condition : sentence
-               | coincidence
-               | during
-               | subword'''
+    '''condition : fact
+                 | name-def
+                 | coincidence
+                 | during
+                 | subword'''
     p[0] = p[1]
 
 def p_coincidence(p):
@@ -419,7 +419,7 @@ def p_consecuences(p):
         p[0] = [p[1]]
 
 def p_consecuence(p):
-    '''consecuence : sentence
+    '''consecuence : fact
                    | end-duration'''
     p[0] = p[1]
 
