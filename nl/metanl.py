@@ -373,11 +373,11 @@ class Noun(Word):
         return Word.__new__(cls, classname, bases, newdict)
 
     def __init__(cls, classname, bases, newdict):
-        superclassname = bases[0].__name__
-        clp = '(defclass %s (is-a %s))' % (classname, superclassname)
+        parents = ' '.join([base.__name__ for base in bases])
+        clp = '(defclass %s (is-a %s))' % (classname, parents)
         if classname != 'Thing':
             utils.to_history('%s are %s.' % (classname.lower(),
-                                         superclassname.lower()))
+                                         parents.lower().replace(' ', ', ')))
         super(Noun, cls).__init__(classname, bases, newdict, clp=clp)
 
 utils.register('Noun', Noun)
@@ -414,8 +414,9 @@ class Verb(Word):
                                     'NUMBER' or 'INSTANCE')
                   for mod,modclass in cls.mods.items()]
         slots = ' '.join(slots)
+        parents = ' '.join([base.__name__ for base in bases])
         clp = '(defclass %s (is-a %s) %s)' % (classname,
-                                              bases[0].__name__,
+                                              parents,
                                               slots)
         for mod,modclass in cls.mods.items():
             if isinstance(modclass, type):
@@ -423,7 +424,7 @@ class Verb(Word):
         modification = ['%s a %s' % (mod, modclass.lower())
                   for mod, modclass in cls.mods.items()]
         verb_def = '%s is %s withsubject %s' % (classname.lower(),
-                                                bases[0].__name__.lower(),
+                                                parents.lower().replace(' ', ', '),
                                                 cls.subject.__name__.lower())
         if modification:
             verb_def += ' andcanbe ' + ', '.join(modification)

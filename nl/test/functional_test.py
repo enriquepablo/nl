@@ -314,3 +314,22 @@ class noun_test(object):
         assert nl.kb.ask(nl.Fact(john, self.n.Eating(what=self.n.b1)))
         assert nl.kb.ask(nl.Fact(john, self.n.Feels(what=self.n.Eating(what=self.n.b1))))
         assert nl.kb.ask(nl.Fact(john, self.n.Smelling(what=self.n.b1)))
+
+
+class multi_test(object):
+    def setup(self):
+        from nl.examples import multi
+        self.m = multi
+
+    def teardown(self):
+        reset()
+        del self.m
+
+    def first_test(self):
+        assert nl.kb.ask(nl.Fact(self.m.dos, self.m.Uno_verb(to=self.m.tre)))
+        assert not nl.kb.ask(nl.Fact(self.m.tre, self.m.Uno_verb(to=self.m.dos)))
+        nl.kb.extend()
+        assert nl.kb.ask(nl.Fact(self.m.tre, self.m.Uno_verb(to=self.m.dos)))
+        assert nl.kb.ask(nl.Fact(self.m.tre, self.m.Tre_verb(to=self.m.dos)))
+        assert nl.kb.ask(nl.Fact(self.m.dos, self.m.Dos_verb(to=self.m.uno)))
+        assert nl.kb.ask(nl.Fact(self.m.dos, self.m.Tre_verb(to=self.m.uno)))
