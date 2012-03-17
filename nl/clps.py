@@ -73,6 +73,8 @@ _duration_clps = '''
               (pattern-match reactive)
               (create-accessor read-write)
               (access read-write))
+    (slot fact (type INSTANCE)
+              (pattern-match non-reactive))
     (multislot children (pattern-match non-reactive)
                         (create-accessor read-write)
                         (access read-write)
@@ -98,14 +100,15 @@ _finishchildfun_clp = '''
 (deffunction finish-child-end (?duration ?instant ?family)
     (bind ?families (delete-member$ (send ?duration get-families) ?family))
     (send ?duration put-families ?families)
-    (if (and (= (send ?duration get-end) -1.0)
-             (= (length$ (send ?duration get-families)) 0))
+    (if (and (= (length$ ?families) 0)
+             (< (send ?duration get-start) (python-call ptime)))
        then
-        (send ?duration put-end ?instant)
         (progn$ (?child (send ?duration get-children))
           (finish-child-end (send ?child get-child) ?instant (send ?child get-family))
+          (unmake-instance ?child)
         )
-        (send ?duration put-children (create$)))
+        (unmake-instance (send ?duration get-fact)))
+        (unmake-instance ?duration))
     (return TRUE)
 )
 '''
@@ -115,13 +118,12 @@ clips.Build(_finishchildfun_clp)
 
 _finishfun_clp = '''
 (deffunction finish-end (?duration ?instant)
-    (if (= (send ?duration get-end) -1.0)
-       then
-        (send ?duration put-end ?instant)
         (progn$ (?child (send ?duration get-children))
           (finish-child-end (send ?child get-child) ?instant (send ?child get-family))
+          (unmake-instance ?child)
         )
-        (send ?duration put-children (create$)))
+        (unmake-instance (send ?duration get-fact))
+        (unmake-instance ?duration)
     (return TRUE)
 )
 '''
@@ -250,7 +252,15 @@ _add_pred ="""
 logger.info(_add_pred)
 clips.Build(_add_pred)
 
-_fact_clp = '(defclass Fact (is-a Namable) (slot truth (type INTEGER) (default 1) (pattern-match reactive)) (slot subject (type ?VARIABLE) (pattern-match reactive)) (slot predicate (type INSTANCE) (pattern-match reactive)) (slot time (type ?VARIABLE) (pattern-match reactive)))'
+_fact_clp = '''(defclass Fact (is-a Namable)
+                        (slot truth (type INTEGER) (default 1)
+                                    (pattern-match reactive))
+                        (slot subject (type ?VARIABLE)
+                                      (pattern-match reactive))
+                        (slot predicate (type INSTANCE)
+                                        (pattern-match reactive))
+                        (slot time (type ?VARIABLE)
+                                   (pattern-match reactive)))'''
 logger.info(_fact_clp)
 clips.Build(_fact_clp)
 
@@ -267,7 +277,7 @@ clips.Build(_fact_clp)
 if conf.with_callback:
     import utils
     utils.load_plugins()
-    callback = '(python-call factback ?s ?p ?t ?r)'
+    callback = '(python-call factback ?s ?p ?t ?r "add")'
 else:
     callback = ''
 
@@ -300,13 +310,15 @@ _add_prop = '''
                              ))
         )
         (if (= ?count 0)
-            then (if (eq (class ?t) Duration)
-                  then (send ?t put-parents (create$)))
-                 (make-instance of Fact (subject ?s)
-                                        (predicate ?p)
-                                        (time ?t)
-                                        (truth ?r)))
-             %s)''' % callback
+            then (bind ?fact (make-instance of Fact (subject ?s)
+                                                    (predicate ?p)
+                                                    (time ?t)
+                                                    (truth ?r)))
+                 (if (eq (class ?t) Duration)
+                  then (send ?t put-parents (create$))
+                       (send ?t put-fact ?fact))
+                 
+             %s))''' % callback
 
 logger.info(_add_prop)
 try:

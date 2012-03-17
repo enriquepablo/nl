@@ -28,7 +28,6 @@ class cms_test(object):
 
     def third_test(self):
         nl.nltime.now()
-        nl.clips.Eval('(dribble-on "clipstrace")')
         # john is a person
         john = self.cms.Person('john')
         # pete is a person
@@ -125,10 +124,11 @@ class cms_test(object):
 
         assert nl.kb.ask(nl.Fact(c1, self.cms.Has(what=self.cms.private), nl.Duration(start=nl.Instant('now'))))
         assert not nl.kb.ask(nl.Fact(c1, self.cms.Has(what=self.cms.public), nl.Duration(start=nl.Instant('now'))))
+        assert not nl.kb.ask(nl.Fact(pete, self.cms.Can(what=self.cms.View(what=c1)), nl.Duration(start=nl.Instant('now'))))
+        assert not nl.kb.ask(nl.Fact(pete, self.cms.Can(what=self.cms.View(what=c1)), nl.Duration('Duration1')))
         # who can view what?
         assert nl.kb.ask(self.cms.Person('Person1'), nl.Fact(self.cms.Person('Person1'), self.cms.Can(what=self.cms.View(what=c1)), nl.Instant('now'))) == [{'Person1': 'admin'}, {'Person1': 'john'}, {'Person1': 'jane'}]
 
-        nl.clips.Eval('(dribble-off)')
         #import os
         #from nl.log import log_dir, log_file
         #os.remove(log_file)
@@ -174,19 +174,19 @@ class cms3_test(object):
         self.cms.r_workflow_for_content(self.cms.Document,
                                         self.cms.doc_workflow,
                                         self.cms.Context('one'))
-        for n in xrange(0, 100, 3):
+        for n in xrange(0, 10, 3):
             for m, c in enumerate(contexts):
                 self._add_content('cpu%d' % (n+m), 'public', c)
-        for n in xrange(0, 100, 3):
+        for n in xrange(0, 10, 3):
             for m, c in enumerate(contexts):
                 self._add_content('cpr%d' % (n+m), 'private', c)
         for n in xrange(0, 50, 3):
             for m, c in enumerate(contexts):
                 self._add_user('m%d' % (n+m), 'manager', c)
-        for n in xrange(0, 100, 3):
+        for n in xrange(0, 10, 3):
             for m, c in enumerate(contexts):
                 self._add_user('e%d' % (n+m), 'editor', c)
-        for n in xrange(0, 300, 3):
+        for n in xrange(0, 30, 3):
             for m, c in enumerate(contexts):
                 self._add_user('u%d' % (n+m), 'member', c)
 
@@ -195,11 +195,15 @@ class cms3_test(object):
                                    to=self.cms.Publish(
                                              what=self.cms.Content('cpr3'))),
                            self.cms.Instant('now')))
+        nl.clips.Eval('(dribble-on "clipstrace")')
+        nl.clips.Eval('(watch instances)')
 
         nl.kb.extend()
         assert nl.kb.ask(nl.Fact(self.cms.Person('m3'),
                                  self.cms.Publish(what=self.cms.Content('cpr3')),
                                  nl.Instant('now')))
+        nl.clips.Eval('(unwatch all)')
+        nl.clips.Eval('(dribble-off)')
         assert nl.kb.ask(nl.Fact(self.cms.Document('cpr3'),
                                  self.cms.Has(what=self.cms.Status('public')),
                                  nl.Duration(start=nl.Instant('now'))))

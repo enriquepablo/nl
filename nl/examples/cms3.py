@@ -182,8 +182,9 @@ try:
  ],[
      Fact(Person('Person1'), Verb('ActionVerb1', Action)(what=Content('Content1')), Instant('Instant1'))]))
 except:
-   logger.info(clips.ErrorStream.Read())
-   raise
+    import clips
+    logger.info(clips.ErrorStream.Read())
+    raise
 
 kb.tell( Fact(view_perm, Required(to=View, over=public), Duration(start='now', end='now')) )
 

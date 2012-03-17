@@ -16,9 +16,9 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with ln.  If not, see <http://www.gnu.org/licenses/>.
 
-from nl.log import logger
 import uuid
 from nl.metanl import Namable, Subword
+from nl.nltime import Finish
 
 class Rule(Namable):
     """
@@ -33,7 +33,7 @@ class Rule(Namable):
     def __init__(self, prems, cons):
         self.name = uuid.uuid4().get_hex()
         self.prems = prems
-        self.cons = cons
+        self.cons = sorted(cons, key=lambda x: isinstance(x, Finish) and 2 or 1)
         sane = False
         for x in xrange(len(self.prems)):
             if sane:

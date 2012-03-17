@@ -259,7 +259,7 @@ class Exists(Namable):
         elif constraint:
             queries.append('(and %s)' % ' '.join(constraint))
 
-    def in_fact(self, fact):
+    def in_fact(self, fact, fr):
         '''
         To be overriden by subclasses.
         hook called from clips when a fact that has a predicate
@@ -268,4 +268,4 @@ class Exists(Namable):
         TODO: implement as an after message-handler for creation of
         instances of Exists, so that not all facts make the call.
         '''
-        logger.info('FROM STATE! %s' % str(fact))
+        logger.info('FROM STATE! %s %s' % (fr, str(fact)))

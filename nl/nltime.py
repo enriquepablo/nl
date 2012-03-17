@@ -117,8 +117,7 @@ class Duration(Time):
         else:
             self.end = isinstance(end, Instant) and end or \
                                                   Instant(end)
-            if not utils.varpat.match(str(self.end.value)) and \
-                   float(self.end.value) == utils._now:
+            if float(self.end.value) == utils._now:
                 self.end = Instant('-1.0')
 
     def __str__(self):
@@ -160,10 +159,10 @@ class Duration(Time):
             return self.get_var_slot_constraint(vrs, self.value)
         newvar = utils._newvar()
         constraint = '?'+newvar
-        for x in ('start', 'end'):
-            x_constraint = getattr(self, x).get_constraint(vrs, newvar, [x])
-            if x_constraint:
-                constraint += '&:(eq (send ?%s get-%s) %s)' % (newvar, x, x_constraint)
+        c = self.start.get_constraint(vrs, newvar, ['start'])
+        if c:
+            constraint += '&:(eq (send ?%s get-start) %s)' % (newvar, c)
+        constraint += '&:(eq (send ?%s get-end) -1.0)' % (newvar)
         return constraint
 
     def put(self, vrs, make=True):

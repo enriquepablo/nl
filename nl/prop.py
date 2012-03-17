@@ -131,7 +131,7 @@ class Fact(Namable):
         put proposition in clips as a conditional element of a rule
         """
         if vrs is None: vrs = []
-        ce = '(logical (object (is-a Fact) (subject %s) (predicate %s) (time %s) (truth %s)))'
+        ce = '(object (is-a Fact) (subject %s) (predicate %s) (time %s) (truth %s))'
         constraint_meth = getattr(self.subject, 'clsput', self.subject.get_slot_constraint)
         s = constraint_meth(vrs)
         constraint_meth = getattr(self.predicate, 'clsput', self.predicate.get_slot_constraint)
@@ -163,7 +163,7 @@ class Fact(Namable):
                              self.time.tonl())
 
 
-def factback(csubj, cpred, ctime, ctruth):
+def factback(csubj, cpred, ctime, ctruth, fr):
     """
     """
     try:
@@ -171,10 +171,13 @@ def factback(csubj, cpred, ctime, ctruth):
     except clips.ClipsError:
         subj = Word.from_clips(csubj)
     pred = Namable.from_clips(cpred)
-    t = Time.from_clips(ctime)
+    try:
+        t = Time.from_clips(ctime)
+    except:
+        t = Instant(10)
     truth = int(str(ctruth))
     fact = Fact(subj, pred, t, truth=truth)
-    pred.in_fact(fact)
+    pred.in_fact(fact, fr)
     for plugin in utils.plugins:
         plugin(fact)
 
