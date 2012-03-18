@@ -26,7 +26,7 @@ from nl.log import logger, get_history
 NAME = ''
 
 # vars are always XNUM
-t_VAR = r'([A-Z][a-z_]+)(Verb|Noun|Word)?\d+'
+t_VAR = r'([A-Z][a-z_]*)(Verb|Noun|Word)?\d+'
 varpat = re.compile(t_VAR)
 
 plugins = []

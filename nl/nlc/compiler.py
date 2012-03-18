@@ -53,7 +53,8 @@ def p_extend(p):
     p[0] = str(response)
 
 def p_passtime(p):
-    'statement : PASSTIME DOT'
+    '''statement : PASSTIME DOT
+                 | NOW DOT'''
     response = nl.now()
     p[0] = str(response)
 
@@ -111,9 +112,11 @@ def p_time(p):
     '''time : NOW
             | VAR
             | AT instant
+            | ONWARDS
             | FROM instant ONWARDS
             | FROM instant TILL instant
-            | INTERSECTION durations'''
+            | INTERSECTION durations
+            | UNTIL durations'''
     if p[1] == 'now':
         p[0] = nl.Instant('now')
     elif VAR_PAT.match(p[1]):
@@ -123,6 +126,8 @@ def p_time(p):
         p[0] = nl.Duration(p[1])
     elif p[1] == 'at':
         p[0] = p[2]
+    elif p[1] == 'onwards':
+        p[0] = nl.Duration(start='now', end='now')
     elif p[1] == 'from':
         if p[3] == 'onwards':
             p[0] = nl.Duration(start=p[2], end='now')
@@ -130,6 +135,8 @@ def p_time(p):
             p[0] = nl.Duration(start=p[2], end=p[4])
     elif p[1] == 'intersection':
         p[0] = nl.Intersection(*p[2])
+    elif p[1] == 'until':
+        p[0] = nl.Duration(start='now', end=nl.Min_end(*p[2]))
 
 def p_instant(p):
     '''instant : TIME
