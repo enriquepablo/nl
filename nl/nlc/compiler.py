@@ -59,7 +59,8 @@ def p_passtime(p):
     p[0] = str(response)
 
 def p_question(p):
-    'statement : fact QMARK'
+    '''statement : fact QMARK
+                 | definition QMARK'''
     response = nl.kb.ask_obj(p[1])
     if response:
         resp = []
@@ -78,7 +79,10 @@ def p_assertion(p):
 
 def p_definition(p):
     'statement : definition DOT'
-    response = p[1]
+    if isinstance(p[1], basestring):
+        response = p[1]
+    else:
+        response = nl.kb.tell(p[1])
     p[0] = str(response)
 
 def p_fact(p):
