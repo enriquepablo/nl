@@ -16,6 +16,13 @@ class CompileError(Exception): pass
 VAR_PAT = re.compile(t_VAR)
 NUM_PAT = re.compile(t_NUMBER)
 
+SPECIAL_VARS = {
+    re.compile(r'^I(\d+)$'): 'Instant',
+    re.compile(r'^D(\d+)$'): 'Duration',
+    re.compile(r'^O(\d+)$'): 'Duration',
+    re.compile(r'^N(\d+)$'): 'Number',
+}
+
 precedence = (
     ('left', 'COMMA'),
     ('left', 'LBRACK'),  )
@@ -23,6 +30,11 @@ precedence = (
 # UTILS
 
 def _from_var(var):
+    for pat, name in SPECIAL_VARS.items():
+        m = pat.match(var)
+        if m:
+            var = name + m.group(1)
+            break
     m = VAR_PAT.match(var)
     name = m.group(1)
     try:
