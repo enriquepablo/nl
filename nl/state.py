@@ -216,7 +216,9 @@ class Exists(Namable):
         if self.value and utils.varpat.match(self.value):
             return self.put_var(vrs)
         slots = []
-        for mod in self.mods:
+        mods = self.mods.keys()
+        mods.sort()
+        for mod in mods:
             mod_o = getattr(self, mod, _m)
             if mod_o is not _m:
                 put_meth = getattr(mod_o, 'clsput', mod_o.put)
