@@ -20,9 +20,12 @@ setup(
     dependency_links = [
     ],
     install_requires = ['setuptools>=0.6c11',
+                        'python-daemon',
                         'ply',],
     entry_points = {
+          'console_scripts': ['npldaemon = nl.npldaemon:main',
+                              'nlpy = nl.nlpy:main'],
+          },
 #        'console_scripts':
 #            [ 'plot_ph22 = nl.examples.physics22:plotPh22', ],
-    }
 )

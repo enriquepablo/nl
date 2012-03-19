@@ -17,6 +17,9 @@
 # along with ln.  If not, see <http://www.gnu.org/licenses/>.
 import os
 
+host = 'localhost'
+port = 8280
+
 debug_level = 'INFO'
 
 with_callback = True
