@@ -279,22 +279,34 @@ def p_def(p):
     p[0] = p[1]
 
 def p_noun_def(p):
-    'noun-def : TERM ARE TERM'
-    try:
-        superclass = nl.utils.get_class(p[3])
-    except KeyError:
-        raise CompileError('unknown name for noun: ' + p[3])
-    else:
+    'noun-def : TERM ARE terms'
+    superclasses = []
+    for noun in p[3]:
+        try:
+            superclass = nl.utils.get_class(noun)
+        except KeyError:
+            raise CompileError('unknown name for noun: ' + noun)
         if not issubclass(superclass, nl.Thing):
-            raise CompileError('this is not a noun: ' + p[3])
-    metaclass = superclass.__metaclass__
+            raise CompileError('this is not a noun: ' + noun)
+        superclasses.append(superclass)
     name = p[1].capitalize()
     try:
-        cls = metaclass(name, bases=(superclass,), newdict={})
+        cls = nl.Noun(name, bases=tuple(superclasses), newdict={})
     except ValueError:
         raise CompileError('ilegal name for noun: ' % (p[1]))
     nl.utils.register(name, cls)
     p[0] = 'Noun %s defined.' % name
+ 
+def p_terms(p):
+    '''terms : TERM COMMA terms
+             | TERM'''
+    _terms(p)
+
+def _terms(p):
+    if len(p) == 4:
+        p[0] = [p[1]] + p[3]
+    else:
+        p[0] = [p[1]]
 
 def p_name_def(p):
     'name-def : TERM ISA TERM'
@@ -305,18 +317,19 @@ def p_name_def(p):
     p[0] = cls(p[1])
 
 def p_verb_def(p):
-    '''verb-def : verb IS verb WITHSUBJECT TERM ANDCANBE modification-def
-                | verb IS verb WITHSUBJECT TERM
-                | verb IS verb ANDCANBE modification-def
-                | verb IS verb'''
-    try:
-        superclass = nl.utils.get_class(p[3])
-    except KeyError:
-        raise CompileError('unknown name for verb: ' + p[3])
-    else:
-        if not issubclass(superclass, nl.Exists):
-            raise CompileError('this is not a verb: ' + p[3])
-    metaclass = superclass.__metaclass__
+    '''verb-def : verb IS verbs WITHSUBJECT TERM ANDCANBE modification-def
+                | verb IS verbs WITHSUBJECT TERM
+                | verb IS verbs ANDCANBE modification-def
+                | verb IS verbs'''
+    superclasses = []
+    for v in p[3]:
+        try:
+            superclass = nl.utils.get_class(v)
+        except KeyError:
+            raise CompileError('unknown name for verb: ' + v)
+        else:
+            if not issubclass(superclass, nl.Exists):
+                raise CompileError('this is not a verb: ' + v)
     newdict = {}
     if len(p) > 4 and p[4] != 'andcanbe':
         try:
@@ -329,10 +342,15 @@ def p_verb_def(p):
     if len(p) == 8:
         newdict['mods'] = p[7]
     name = p[1].capitalize()
-    vclass = metaclass(name, bases=(superclass,), newdict=newdict)
+    vclass = nl.Verb(name, bases=tuple(superclasses), newdict=newdict)
 
     nl.utils.register(name, vclass)
     p[0] = 'Verb %s defined.' % name
+ 
+def p_verbs(p):
+    '''verbs : verb COMMA verbs
+             | verb'''
+    _terms(p)
 
 def p_modification_def(p):
     '''modification-def : mod-def COMMA modification-def
@@ -346,11 +364,11 @@ def p_mod_def(p):
     try:
         typ = nl.utils.get_class(p[3])
     except KeyError:
-        raise CompileError('unknown word for modifier: ' + p[3])
+        raise CompileError('unknown type for modifier: ' + p[3])
     name = nl.kb.get_symbol(p[1])
     if not isinstance(name, basestring):
         prev = name.__class__.__name__.lower()
-        raise CompileError('bad name for modifier, already a %s: %s' + (prev,
+        raise CompileError('bad label for modifier, already a %s: %s' + (prev,
                                                                         p[1]))
     p[0] = {name: typ}
 
@@ -383,32 +401,20 @@ def p_coincidence(p):
     p[0] = nl.Coincide(*p[2])
 
 def p_durations(p):
-    '''durations : durations COMMA VAR
-                 | VAR COMMA VAR'''
-    if isinstance(p[1], list):
-        newd = _from_var(p[3])
-        if not isinstance(newd, nl.Duration):
-            raise CompileError('bad name for duration variable: ' + p[3])
-        p[1].append(newd)
-        p[0] = p[1]
+    '''durations : VAR COMMA durations
+                 | VAR'''
+    newd = _from_var(p[1])
+    if not isinstance(newd, nl.Duration):
+        raise CompileError('bad name for duration variable: ' + p[1])
+    if len(p) == 4:
+        p[3].append(newd)
+        p[0] = p[3]
     else:
-        durs = {1: _from_var(p[1]), 3: _from_var(p[3])}
-        for k, d in durs.items():
-            if not isinstance(d, nl.Duration):
-                raise CompileError('bad name for duration variable: ' + p[k])
-        p[0] = durs.values()
+        p[0] = [newd]
 
 def p_during(p):
-    '''during : instant DURING durations
-              | instant DURING VAR'''
-    if isinstance(p[3], basestring) and VAR_PAT.match(p[3]):
-        dur = _from_var(p[3])
-        if not isinstance(dur, nl.Duration):
-            raise CompileError(
-                         'not a valid variable name for a duration: ' % p[3])
-        p[0] = nl.During(p[1], dur)
-    else:
-        p[0] = nl.During(p[1], *p[3])
+    '''during : instant DURING durations'''
+    p[0] = nl.During(p[1], *p[3])
 
 def p_subword(p):
     '''subword : TERM SUBWORDOF TERM
@@ -449,12 +455,13 @@ def p_consecuence(p):
     p[0] = p[1]
 
 def p_end_duration(p):
-    '''end-duration : ENDDURATION VAR NOW
-                  | ENDDURATION VAR AT instant'''
+    '''end-duration : FINISH VAR
+                    | FINISH VAR NOW
+                    | FINISH VAR AT instant'''
     dur = _from_var(p[2])
     if not isinstance(dur, nl.Duration):
         raise CompileError('not a valid variable name for a duration: ' % p[3])
-    if p[3] == 'now':
+    if len(p) in (3, 4):
         p[0] = nl.Finish(dur, nl.Instant('now'))
     else:
         p[0] = nl.Finish(dur, p[4])
