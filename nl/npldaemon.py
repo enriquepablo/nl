@@ -18,4 +18,6 @@ class NlTCPHandler(SocketServer.StreamRequestHandler):
     def handle(self):
         data = self.rfile.readline().strip('\n ')
         resp = nl.yacc.parse(data)
+        nl.extend()
+        nl.now()
         self.wfile.write(resp)
