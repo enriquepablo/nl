@@ -1,6 +1,7 @@
 """
 """
 import re
+from collections import defaultdict
 import nl
 import ply.yacc as yacc
 
@@ -474,3 +475,52 @@ def p_error(p):
 # Use this if you want to build the parser using SLR instead of LALR
 # yacc.yacc(method="SLR")
 yacc.yacc()
+
+
+# To print the grammar #
+########################
+
+def print_grammar():
+    grammar = defaultdict(list)
+    rules = []
+    gused = set()
+    for name, obj in globals().items():
+        if name.startswith('p_'):
+            if not getattr(obj, '__doc__', False):
+                continue
+            rule, defs = [o.strip() for o in obj.__doc__.split(':')]
+            defs = [d.strip().split(' ') for d in  defs.split('|')]
+            used = []
+            for d in defs:
+                for n in d:
+                    if n.islower():
+                        used.append(n)
+            grammar[rule] += defs
+            grammar[rule + 'used'] += used
+            gused = gused.union(set(used))
+    first = None
+    for rule in grammar:
+        if not rule.endswith('used') and rule not in gused:
+            first = rule
+            break
+    ruleprint(first, grammar[first])
+    printrule(first, grammar, set())
+
+def printrule(rule, grammar, done):
+    spawn = []
+    for r in grammar[rule + 'used']:
+        if r not in done:
+            done.add(r)
+            ruleprint(r, grammar[r])
+            spawn.append(r)
+    for r in spawn:
+        printrule(r, grammar, done)
+
+def ruleprint(name, defs):
+    try:
+        print '    ', name, ' : ', ' '.join(defs[0])
+        for d in defs[1:]:
+            print '    ', ' ' * len(name), ' | ', ' '.join(d)
+    except IndexError:
+        print '    ', name
+    print '\n'
