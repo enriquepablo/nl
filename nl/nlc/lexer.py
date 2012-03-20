@@ -12,7 +12,8 @@ tokens = (
     'DOT',
     'QMARK',
     'ISA',
-    'SYMBOL',
+    'TERM',
+    'LABEL',
     'VAR',
     'NUMBER',
     'TIME',
@@ -85,9 +86,15 @@ t_NUMBER = r'(\d+)'
 t_LPAREN = r'\('
 t_RPAREN = r'\)'
 
-def t_SYMBOL(t):
-    r'[a-z][a-z_]*\d*'
-    t.type = reserved.get(t.value, 'SYMBOL')    # Check for reserved words
+
+def t_TERM(t):
+    r'^[a-z][a-z_]*\d*$'
+    t.type = reserved.get(t.value, 'TERM')    # Check for reserved words
+    return t
+
+def t_LABEL(t):
+    r'^[a-z]+$'
+    t.type = reserved.get(t.value, 'LABEL')    # Check for reserved words
     return t
 
 def t_TIME(t):

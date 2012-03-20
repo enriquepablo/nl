@@ -47,20 +47,26 @@ def _from_var(var):
 
 # BNF
 
+def p_sentence(p):
+    '''sentence : statement
+                | question
+                | order'''
+    p[0] = p[1]
+
 def p_extend(p):
-    'statement : EXTEND DOT'
+    'order : EXTEND DOT'
     response = nl.kb.extend()
     p[0] = str(response)
 
 def p_passtime(p):
-    '''statement : PASSTIME DOT
-                 | NOW DOT'''
+    '''order : PASSTIME DOT
+             | NOW DOT'''
     response = nl.now()
     p[0] = str(response)
 
 def p_question(p):
-    '''statement : fact QMARK
-                 | definition QMARK'''
+    '''question : fact QMARK
+                | definition QMARK'''
     response = nl.kb.ask_obj(p[1])
     if response:
         resp = []
@@ -71,19 +77,15 @@ def p_question(p):
         p[0] = str(nl.kb.ask(p[1]))
 
 def p_assertion(p):
-    '''statement : fact DOT
+    '''statement : definition DOT
+                 | fact DOT
                  | rule DOT'''
-    response = nl.kb.tell(p[1])
-
-    p[0] = str(response)
-
-def p_definition(p):
-    'statement : definition DOT'
     if isinstance(p[1], basestring):
+        # name-defs already told
         response = p[1]
     else:
         response = nl.kb.tell(p[1])
-    p[0] = str(response)
+        p[0] = str(response)
 
 def p_fact(p):
     '''fact : subject predicate
@@ -98,7 +100,7 @@ def p_fact(p):
         raise CompileError(e.args[0])
 
 def p_subject(p):
-    '''subject : SYMBOL
+    '''subject : TERM
                | VAR
                | varvar'''
     if isinstance(p[1], basestring):
@@ -206,7 +208,7 @@ def p_predicate(p):
                 raise CompileError(e.args[0])
 
 def p_verb(p):
-    '''verb : SYMBOL'''
+    '''verb : TERM'''
     try:
         verb = nl.utils.get_class(p[1])
     except KeyError:
@@ -223,12 +225,12 @@ def p_modification(p):
     p[0] = p[1]
  
 def p_modifier(p):
-    '''modifier : SYMBOL object'''
+    '''modifier : LABEL object'''
     p[0] = {p[1]: p[2]}
     
  
 def p_object(p):
-    '''object : SYMBOL
+    '''object : TERM
               | NUMBER
               | VAR
               | predicate
@@ -277,7 +279,7 @@ def p_def(p):
     p[0] = p[1]
 
 def p_noun_def(p):
-    'noun-def : SYMBOL ARE SYMBOL'
+    'noun-def : TERM ARE TERM'
     try:
         superclass = nl.utils.get_class(p[3])
     except KeyError:
@@ -295,7 +297,7 @@ def p_noun_def(p):
     p[0] = 'Noun %s defined.' % name
 
 def p_name_def(p):
-    'name-def : SYMBOL ISA SYMBOL'
+    'name-def : TERM ISA TERM'
     try:
         cls = nl.utils.get_class(p[3])
     except KeyError:
@@ -303,10 +305,10 @@ def p_name_def(p):
     p[0] = cls(p[1])
 
 def p_verb_def(p):
-    '''verb-def : SYMBOL IS SYMBOL WITHSUBJECT SYMBOL ANDCANBE modification-def
-                | SYMBOL IS SYMBOL WITHSUBJECT SYMBOL
-                | SYMBOL IS SYMBOL ANDCANBE modification-def
-                | SYMBOL IS SYMBOL'''
+    '''verb-def : verb IS verb WITHSUBJECT TERM ANDCANBE modification-def
+                | verb IS verb WITHSUBJECT TERM
+                | verb IS verb ANDCANBE modification-def
+                | verb IS verb'''
     try:
         superclass = nl.utils.get_class(p[3])
     except KeyError:
@@ -340,7 +342,7 @@ def p_modification_def(p):
     p[0] = p[1]
 
 def p_mod_def(p):
-    'mod-def : SYMBOL A SYMBOL'
+    'mod-def : LABEL A TERM'
     try:
         typ = nl.utils.get_class(p[3])
     except KeyError:
@@ -409,9 +411,9 @@ def p_during(p):
         p[0] = nl.During(p[1], *p[3])
 
 def p_subword(p):
-    '''subword : SYMBOL SUBWORDOF SYMBOL
-               | SYMBOL SUBWORDOF VAR
-               | VAR SUBWORDOF SYMBOL
+    '''subword : TERM SUBWORDOF TERM
+               | TERM SUBWORDOF VAR
+               | VAR SUBWORDOF TERM
                | VAR SUBWORDOF VAR'''
     if VAR_PAT.match(p[1]):
         p1 = _from_var(p[1])
