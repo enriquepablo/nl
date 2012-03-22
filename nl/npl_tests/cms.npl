@@ -15,35 +15,27 @@ img2 isa image.
 ctx1 isa context.
 ctx2 isa context.
 
-
-
 content_action is exists withsubject person andcanbe what a content.
 view is content_action.
 edit is content_action.
 owns is content_action.
 
-pete [owns what doc1].
-sue [edit what img2].
-
-
-
 located is exists withsubject thing andcanbe in a context.
 
 if:
-   Thing1 [located in Context1];
-   Context1 [located in Context2];
+   Thing1 [located in Context1] D1;
+   Context1 [located in Context2] D2;
 then:
-   Thing1 [located in Context2].
+   Thing1 [located in Context2] until D1, D2.
 
 
-doc1 [located in ctx1].
-ctx1 [located in ctx2].
+doc1 [located in ctx1] onwards.
+ctx1 [located in ctx2] onwards.
 
 extend.
-now.
 
 doc1 [located in ctx2]?
-doc1 \[located in ctx2\] at [0-9]+
+doc1 \[located in ctx2\] since [0-9]+ onwards
 
 
 wants is exists withsubject person andcanbe that a person, do a content_action.
@@ -127,24 +119,26 @@ is_protected is exists withsubject verb
                                 for a status.
 
 if:
-   Person1 [wants that Person1, do [Content_actionVerb1 what Content1]];
+   Person1 [wants that Person1, do [Content_actionVerb1 what Content1]] at I1;
    Content1 [located in Context1] D1;
    Content1 [has what Status1] D2;
    Person1 [has what Role1] D3;
    Role1 [has what Permission1] D4;
    Content_actionVerb1 [is_protected by Permission1, in Context1, for Status1] D5;
+   I1 during D1, D2, D3, D4, D5;
 then:
-   Person1 [Content_actionVerb1 what Content1].
-   
+   Person1 [Content_actionVerb1 what Content1] at I1.
+
 if:
-   Person1 [Wf_actionVerb1 what Content1(ContentNoun1)];
+   Person1 [Wf_actionVerb1 what Content1(ContentNoun1)] at I1;
    Workflow1 [is_assigned to ContentNoun1, in Context1] D1;
    Workflow1 [has what Transition1] D2;
    Transition1 [executed by Wf_actionVerb1, fro_m Status1, to Status2] D3;
    Content1 [has what Status1] D4;
+   I1 during D1, D2, D3, D4;
 then:
-   finish D4;
-   Content1 [has what Status2] until D1, D2, D3.
+   finish D4 at I1;
+   Content1 [has what Status2] since I1 until D1, D2, D3.
 
 
 manager [has what manage_perm] onwards.
@@ -181,7 +175,6 @@ mary [has what editor] onwards.
 pete [has what visitor] onwards.
 
 doc1 [has what private] onwards.
-doc1 [located in ctx1] onwards.
 
 pete [wants that pete, do [publish what doc1]].
 
@@ -191,7 +184,7 @@ pete [publish what doc1]?
 False
 
 doc1 [has what Status1] D1?
-doc1 \[has what private\] from [0-9]+ onwards
+doc1 \[has what private\] since [0-9]+ onwards
 
 john [wants that john, do [publish what doc1]].
 
@@ -200,9 +193,215 @@ extend.
 john [publish what doc1]?
 john \[publish what doc1\] at [0-9]+
 
-# doc1 [has what public]?
-# doc1 \[has what public\] at [0-9]+
+doc1 [has what public]?
+doc1 \[has what public\] since [0-9]+ onwards
+
+doc1 [has what public] now?
+doc1 \[has what public\] since [0-9]+ onwards
+
+doc1 [has what public] at I1?
+doc1 \[has what public\] since [0-9]+ onwards
 
 doc1 [has what public] D1?
-doc1 \[has what public\] from [0-9]+ onwards
+doc1 \[has what public\] since [0-9]+ onwards
+
+now.
+
+john [wants that john, do [hide what doc1]].
+
+extend.
+now.
+
+doc1 [has what Status1]?
+doc1 \[has what private\] since [0-9]+ onwards
+
+john [wants that john, do [publish what doc1]].
+
+extend.
+now.
+
+doc1 [has what Status1]?
+doc1 \[has what public\] since [0-9]+ onwards
+
+john [wants that john, do [hide what doc1]].
+
+extend.
+now.
+
+doc1 [has what Status1]?
+doc1 \[has what private\] since [0-9]+ onwards
+
+john [wants that john, do [publish what doc1]].
+
+extend.
+now.
+
+doc1 [has what Status1]?
+doc1 \[has what public\] since [0-9]+ onwards
+
+john [wants that john, do [hide what doc1]].
+
+extend.
+now.
+
+doc1 [has what Status1]?
+doc1 \[has what private\] since [0-9]+ onwards
+
+john [wants that john, do [publish what doc1]].
+
+extend.
+now.
+
+doc1 [has what Status1]?
+doc1 \[has what public\] since [0-9]+ onwards
+
+john [wants that john, do [hide what doc1]].
+
+extend.
+now.
+
+doc1 [has what Status1]?
+doc1 \[has what private\] since [0-9]+ onwards
+
+john [wants that john, do [publish what doc1]].
+
+extend.
+now.
+
+doc1 [has what Status1]?
+doc1 \[has what public\] since [0-9]+ onwards
+
+john [wants that john, do [hide what doc1]].
+
+extend.
+now.
+
+doc1 [has what Status1]?
+doc1 \[has what private\] since [0-9]+ onwards
+
+john [wants that john, do [publish what doc1]].
+
+extend.
+now.
+
+doc1 [has what Status1]?
+doc1 \[has what public\] since [0-9]+ onwards
+
+john [wants that john, do [hide what doc1]].
+
+extend.
+now.
+
+doc1 [has what Status1]?
+doc1 \[has what private\] since [0-9]+ onwards
+
+john [wants that john, do [publish what doc1]].
+
+extend.
+now.
+
+doc1 [has what Status1]?
+doc1 \[has what public\] since [0-9]+ onwards
+
+john [wants that john, do [hide what doc1]].
+
+extend.
+now.
+
+doc1 [has what Status1]?
+doc1 \[has what private\] since [0-9]+ onwards
+
+john [wants that john, do [publish what doc1]].
+
+extend.
+now.
+
+doc1 [has what Status1]?
+doc1 \[has what public\] since [0-9]+ onwards
+
+john [wants that john, do [hide what doc1]].
+
+extend.
+now.
+
+doc1 [has what Status1]?
+doc1 \[has what private\] since [0-9]+ onwards
+
+john [wants that john, do [publish what doc1]].
+
+extend.
+now.
+
+doc1 [has what Status1]?
+doc1 \[has what public\] since [0-9]+ onwards
+
+john [wants that john, do [hide what doc1]].
+
+extend.
+now.
+
+doc1 [has what Status1]?
+doc1 \[has what private\] since [0-9]+ onwards
+
+john [wants that john, do [publish what doc1]].
+
+extend.
+now.
+
+doc1 [has what Status1]?
+doc1 \[has what public\] since [0-9]+ onwards
+
+john [wants that john, do [hide what doc1]].
+
+extend.
+now.
+
+doc1 [has what Status1]?
+doc1 \[has what private\] since [0-9]+ onwards
+
+john [wants that john, do [publish what doc1]].
+
+extend.
+now.
+
+doc1 [has what Status1]?
+doc1 \[has what public\] since [0-9]+ onwards
+
+pete [wants that pete, do [view what doc1]].
+
+extend.
+
+pete [view what doc1] now?
+pete \[view what doc1\] at [0-9]+.
+
+john [wants that john, do [hide what doc1]].
+
+extend.
+now.
+
+doc1 [has what Status1]?
+doc1 \[has what private\] since [0-9]+ onwards
+
+pete [wants that pete, do [view what doc1]].
+
+extend.
+
+pete [view what doc1] now?
+False
+
+john [wants that john, do [publish what doc1]].
+
+extend.
+now.
+
+doc1 [has what Status1]?
+doc1 \[has what public\] since [0-9]+ onwards
+
+pete [wants that pete, do [view what doc1]].
+
+extend.
+
+pete [view what doc1] now?
+pete \[view what doc1\] at [0-9]+.
+
 

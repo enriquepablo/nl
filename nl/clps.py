@@ -68,9 +68,9 @@ clips.Build(_reduce_class)
 _duration_clps = '''
 (defclass Duration (is-a Namable)
     (slot start (type NUMBER)
-                (pattern-match reactive))
+                (pattern-match non-reactive))
     (slot end (type NUMBER)
-              (pattern-match reactive)
+              (pattern-match non-reactive)
               (create-accessor read-write)
               (access read-write))
     (slot fact (type INSTANCE)
@@ -250,7 +250,7 @@ _add_pred ="""
         (bind ?pos (str-index "." ?key))
         (while ?pos do
             (bind ?key (str-cat (sub-string 1 (- ?pos 1) ?key)
-                                "_"
+                                "__"
                                 (sub-string (+ ?pos 1) (str-length ?key) ?key)))
             (bind ?pos (str-index "." ?key)))
         (bind ?key (sym-cat ?key))

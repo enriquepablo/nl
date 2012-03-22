@@ -42,7 +42,7 @@ class Fact(Namable):
     positional arg, that has to be of type Time,
     and a named arg 'truth', that is either 0 or 1.
     """
-    def __init__(self, subj, pred, t=Instant('now'), truth=1):
+    def __init__(self, subj, pred, t='now', truth=1):
         self.truth = truth
         if isinstance(pred, str):
             self.predicate = Exists(pred)

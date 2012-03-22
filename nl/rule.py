@@ -33,7 +33,7 @@ class Rule(Namable):
     def __init__(self, prems, cons):
         self.name = uuid.uuid4().get_hex()
         self.prems = prems
-        self.cons = sorted(cons, key=lambda x: isinstance(x, Finish) and 2 or 1)
+        self.cons = sorted(cons, key=lambda x: isinstance(x, Finish) and 1 or 2)
         sane = False
         for x in xrange(len(self.prems)):
             if sane:

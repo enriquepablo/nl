@@ -95,6 +95,14 @@ class Instant(Time, Number):
             return val
         return 'at %s' % val
 
+    def put(self, vrs):
+        val = super(Instant, self).put(vrs)
+        try:
+            if float(val) == utils._now:
+                return '(python-call ptime)'
+        except ValueError:
+            return val
+
 
 class Duration(Time):
     '''
@@ -124,7 +132,7 @@ class Duration(Time):
         if utils.varpat.match(self.value):
             return self.put_var({})
         else:
-            return 'from %s till %s' % (self.start.put({}), self.end.put({}))
+            return 'since %s till %s' % (self.start.put({}), self.end.put({}))
 
     @classmethod
     def from_clips(cls, instance):
@@ -204,8 +212,8 @@ class Duration(Time):
         except AttributeError:
             end = self.pend
         if onwards:
-            return 'from %s onwards' % (start.tonl(from_duration=True))
-        return 'from %s till %s' % (start.tonl(from_duration=True),
+            return 'since %s onwards' % (start.tonl(from_duration=True))
+        return 'since %s till %s' % (start.tonl(from_duration=True),
                                     end.tonl(from_duration=True))
 
     def get_isc(self, queries, vrs, ancestor, mod_path):

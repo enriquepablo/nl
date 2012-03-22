@@ -13,6 +13,7 @@ def shut_up_pyflakes():
 
 
 class CompileError(Exception): pass
+class ParseError(Exception): pass
 
 VAR_PAT = re.compile(t_VAR)
 NUM_PAT = re.compile(t_NUMBER)
@@ -120,9 +121,10 @@ def p_time(p):
             | VAR
             | AT instant
             | ONWARDS
-            | FROM instant ONWARDS
-            | FROM instant TILL instant
             | INTERSECTION durations
+            | SINCE instant ONWARDS
+            | SINCE instant TILL instant
+            | SINCE instant UNTIL durations
             | UNTIL durations'''
     if p[1] == 'now':
         p[0] = nl.Instant('now')
@@ -135,11 +137,13 @@ def p_time(p):
         p[0] = p[2]
     elif p[1] == 'onwards':
         p[0] = nl.Duration(start='now', end='now')
-    elif p[1] == 'from':
+    elif p[1] == 'since':
         if p[3] == 'onwards':
             p[0] = nl.Duration(start=p[2], end='now')
-        else:
+        elif p[3] == 'till':
             p[0] = nl.Duration(start=p[2], end=p[4])
+        elif p[3] == 'until':
+            p[0] = nl.Duration(start=p[2], end=nl.Min_end(*p[4]))
     elif p[1] == 'intersection':
         p[0] = nl.Intersection(*p[2])
     elif p[1] == 'until':
@@ -473,7 +477,7 @@ def p_end_duration(p):
 
 # Error rule for syntax errors
 def p_error(p):
-    print "Syntax error!! ",p
+    raise ParseError('syntax error: ' + str(p))
 
 # Build the parser
 # Use this if you want to build the parser using SLR instead of LALR
