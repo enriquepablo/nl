@@ -1,0 +1,208 @@
+person are thing.
+content are thing.
+document are content.
+image are content.
+context are thing.
+
+john isa person.
+sue isa person.
+pete isa person.
+mary isa person.
+doc1 isa document.
+doc2 isa document.
+img1 isa image.
+img2 isa image.
+ctx1 isa context.
+ctx2 isa context.
+
+
+
+content_action is exists withsubject person andcanbe what a content.
+view is content_action.
+edit is content_action.
+owns is content_action.
+
+pete [owns what doc1].
+sue [edit what img2].
+
+
+
+located is exists withsubject thing andcanbe in a context.
+
+if:
+   Thing1 [located in Context1];
+   Context1 [located in Context2];
+then:
+   Thing1 [located in Context2].
+
+
+doc1 [located in ctx1].
+ctx1 [located in ctx2].
+
+extend.
+now.
+
+doc1 [located in ctx2]?
+doc1 \[located in ctx2\] at [0-9]+
+
+
+wants is exists withsubject person andcanbe that a person, do a content_action.
+is_allowed is exists withsubject person andcanbe to a content_action.
+
+if:
+   Person1 [wants that Person1, do [Content_action1]];
+   Person1 [is_allowed to [Content_action1]];
+then:
+   Person1 [Content_action1].
+
+
+sue [wants that sue, do [view what doc1]].
+sue [is_allowed to [view what doc1]].
+
+extend.
+
+sue [view what doc1]?
+sue \[view what doc1\] at [0-9]+
+
+
+can is exists withsubject person
+              andcanbe what a verb,
+                       where a context.
+
+
+if:
+   Person1 [wants that Person1, do [Content_actionVerb1 what Content1]];
+   Person1 [can what Content_actionVerb1, where Context1];
+   Content1 [located in Context1];
+then:
+   Person1 [Content_actionVerb1 what Content1].
+
+
+mary [wants that mary, do [view what doc1]].
+mary [can what view, where ctx1].
+
+
+wf_action is content_action.
+publish is wf_action.
+hide is wf_action.
+
+
+status are thing.
+public isa status.
+private isa status.
+
+
+workflow are thing.
+
+
+is_assigned is exists withsubject workflow
+                      andcanbe to a noun,
+                               in a context.
+
+
+transition are thing.
+
+has is exists withsubject thing andcanbe what a thing.
+
+
+executed is exists withsubject transition
+                   andcanbe by a verb,
+                            fro_m a status,
+                            to a status.
+
+
+role are thing.
+manager isa role.
+editor isa role.
+visitor isa role.
+
+permission are thing.
+basic_perm isa permission.
+edit_perm isa permission.
+manage_perm isa permission.
+
+is_protected is exists withsubject verb
+                       andcanbe by a permission,
+                                in a context,
+                                for a status.
+
+if:
+   Person1 [wants that Person1, do [Content_actionVerb1 what Content1]];
+   Content1 [located in Context1] D1;
+   Content1 [has what Status1] D2;
+   Person1 [has what Role1] D3;
+   Role1 [has what Permission1] D4;
+   Content_actionVerb1 [is_protected by Permission1, in Context1, for Status1] D5;
+then:
+   Person1 [Content_actionVerb1 what Content1].
+   
+if:
+   Person1 [Wf_actionVerb1 what Content1(ContentNoun1)];
+   Workflow1 [is_assigned to ContentNoun1, in Context1] D1;
+   Workflow1 [has what Transition1] D2;
+   Transition1 [executed by Wf_actionVerb1, fro_m Status1, to Status2] D3;
+   Content1 [has what Status1] D4;
+then:
+   finish D4;
+   Content1 [has what Status2] until D1, D2, D3.
+
+
+manager [has what manage_perm] onwards.
+manager [has what edit_perm] onwards.
+manager [has what basic_perm] onwards.
+editor [has what edit_perm] onwards.
+editor [has what basic_perm] onwards.
+visitor [has what basic_perm] onwards.
+
+publish [is_protected by manage_perm, in ctx1, for private] onwards.
+hide [is_protected by edit_perm, in ctx1, for public] onwards.
+edit [is_protected by edit_perm, in ctx1, for private] onwards.
+edit [is_protected by manage_perm, in ctx1, for public] onwards.
+view [is_protected by edit_perm, in ctx1, for private] onwards.
+view [is_protected by basic_perm, in ctx1, for public] onwards.
+
+wf1 isa workflow.
+
+hide_tr isa transition.
+
+wf1 [has what hide_tr] onwards.
+
+publish_tr isa transition.
+
+wf1 [has what publish_tr] onwards.
+
+hide_tr [executed by hide, fro_m public, to private] onwards.
+publish_tr [executed by publish, fro_m private, to public] onwards.
+
+wf1 [is_assigned to document, in ctx1] onwards.
+
+john [has what manager] onwards.
+mary [has what editor] onwards.
+pete [has what visitor] onwards.
+
+doc1 [has what private] onwards.
+doc1 [located in ctx1] onwards.
+
+pete [wants that pete, do [publish what doc1]].
+
+extend.
+
+pete [publish what doc1]?
+False
+
+doc1 [has what Status1] D1?
+doc1 \[has what private\] from [0-9]+ onwards
+
+john [wants that john, do [publish what doc1]].
+
+extend.
+
+john [publish what doc1]?
+john \[publish what doc1\] at [0-9]+
+
+# doc1 [has what public]?
+# doc1 \[has what public\] at [0-9]+
+
+doc1 [has what public] D1?
+doc1 \[has what public\] from [0-9]+ onwards
+

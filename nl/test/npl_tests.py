@@ -1,4 +1,5 @@
 import os
+import re
 import nl
 from nl.log import logger
 from nl.conf import here
@@ -23,10 +24,11 @@ def run_npl(fname):
     with open(fname) as f:
         resp, buff = None, ''
         for sen in f.readlines():
+            logger.info(sen)
             sen = sen.strip('\n ')
             if resp is not None:
-                logger.info('%s == %s' % (resp, sen))
-                assert resp == sen
+                logger.info('%s match %s' % (sen, resp))
+                assert re.compile(sen).match(resp)
                 resp = None
             elif sen and not sen.startswith('#'):
                 buff += ' ' + sen

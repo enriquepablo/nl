@@ -17,7 +17,6 @@
 # along with ln.  If not, see <http://www.gnu.org/licenses/>.
 
 import clips
-from nl.log import logger
 from nl import utils
 from nl.metanl import Noun, Namable
 

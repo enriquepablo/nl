@@ -88,12 +88,12 @@ t_RPAREN = r'\)'
 
 
 def t_TERM(t):
-    r'^[a-z][a-z_]*\d*$'
+    r'[a-z][a-z_]*\d*'
     t.type = reserved.get(t.value, 'TERM')    # Check for reserved words
     return t
 
 def t_LABEL(t):
-    r'^[a-z]+$'
+    r'[a-z]+'
     t.type = reserved.get(t.value, 'LABEL')    # Check for reserved words
     return t
 

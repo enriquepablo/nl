@@ -41,7 +41,7 @@ def _from_var(var):
     try:
         cls = nl.utils.get_class(name)
     except KeyError:
-        raise CompileError('invalid variable name: ' + name)
+        raise CompileError('invalid variable name: ' + var)
     if m.group(2):
         return nl.metanl.ClassVar(var, cls)
     return cls(var)
@@ -86,7 +86,7 @@ def p_assertion(p):
         response = p[1]
     else:
         response = nl.kb.tell(p[1])
-        p[0] = str(response)
+    p[0] = str(response)
 
 def p_fact(p):
     '''fact : subject predicate
@@ -130,7 +130,7 @@ def p_time(p):
         var = _from_var(p[1])
         if not isinstance(var, nl.Duration):
             raise CompileError('invalid variable name for duration: %s' % p[1])
-        p[0] = nl.Duration(p[1])
+        p[0] = var
     elif p[1] == 'at':
         p[0] = p[2]
     elif p[1] == 'onwards':
@@ -173,9 +173,13 @@ def p_predicate(p):
     if len(p) == 5:
         if isinstance(p[2], basestring) and VAR_PAT.match(p[2]):
             verb = _from_var(p[2])
-            if not isinstance(verb.cls, nl.Exists):
-                raise CompileError(
-                     'not a valid variable name for a verb: ' + p[2])
+            try:
+                if not isinstance(verb.cls, nl.Verb):
+                    raise CompileError(
+                         'not a valid variable name for a verb: ' + p[2])
+            except AttributeError:
+                raise CompileError('you should use a verb variable(with "Verb"'
+                                   ' in it) rather than a predicate variable')
             if isinstance(p[3], basestring) and VAR_PAT.match(p[3]):
                 pred = _from_var(p[3])
                 if not isinstance(pred, nl.Exists):
@@ -226,7 +230,7 @@ def p_modification(p):
     p[0] = p[1]
  
 def p_modifier(p):
-    '''modifier : LABEL object'''
+    '''modifier : TERM object'''
     p[0] = {p[1]: p[2]}
     
  
@@ -318,19 +322,19 @@ def p_name_def(p):
     p[0] = cls(p[1])
 
 def p_verb_def(p):
-    '''verb-def : verb IS verbs WITHSUBJECT TERM ANDCANBE modification-def
-                | verb IS verbs WITHSUBJECT TERM
-                | verb IS verbs ANDCANBE modification-def
-                | verb IS verbs'''
+    '''verb-def : TERM IS verbs WITHSUBJECT TERM ANDCANBE modification-def
+                | TERM IS verbs WITHSUBJECT TERM
+                | TERM IS verbs ANDCANBE modification-def
+                | TERM IS verbs'''
     superclasses = []
     for v in p[3]:
         try:
             superclass = nl.utils.get_class(v)
         except KeyError:
             raise CompileError('unknown name for verb: ' + v)
-        else:
-            if not issubclass(superclass, nl.Exists):
-                raise CompileError('this is not a verb: ' + v)
+        if not issubclass(superclass, nl.Exists):
+            raise CompileError('this is not a verb: ' + v)
+        superclasses.append(superclass)
     newdict = {}
     if len(p) > 4 and p[4] != 'andcanbe':
         try:
@@ -361,7 +365,7 @@ def p_modification_def(p):
     p[0] = p[1]
 
 def p_mod_def(p):
-    'mod-def : LABEL A TERM'
+    'mod-def : TERM A TERM'
     try:
         typ = nl.utils.get_class(p[3])
     except KeyError:

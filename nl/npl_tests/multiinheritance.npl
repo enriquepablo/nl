@@ -1,0 +1,31 @@
+
+transitive is exists withsubject thing andcanbe to a thing.
+
+if:
+    Thing1 [TransitiveVerb1 to Thing2];
+    Thing2 [TransitiveVerb1 to Thing3];
+then:
+    Thing1 [TransitiveVerb1 to Thing3].
+    
+symmetric is exists withsubject thing andcanbe to a thing.
+
+if:
+    Thing1 [SymmetricVerb1 to Thing2];
+then:
+    Thing2 [SymmetricVerb1 to Thing1].
+
+person are thing.
+
+meets is transitive, symmetric withsubject person andcanbe to a person.
+
+john isa person.
+jim isa person.
+tom isa person.
+
+john [meets to jim].
+jim [meets to tom].
+
+extend.
+
+tom [meets to john]?
+tom \[meets to john\] at [0-9]+
