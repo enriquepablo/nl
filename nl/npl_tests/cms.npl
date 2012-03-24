@@ -15,12 +15,12 @@ img2 isa image.
 ctx1 isa context.
 ctx2 isa context.
 
-content_action is exists withsubject person andcanbe what a content.
-view is content_action.
-edit is content_action.
-owns is content_action.
+person can content_action (exists) what a content.
+person can view (content_action).
+person can edit (content_action).
+person can owns (content_action).
 
-located is exists withsubject thing andcanbe in a context.
+thing can located (exists) in a context.
 
 if:
    Thing1 [located in Context1] D1;
@@ -38,8 +38,8 @@ doc1 [located in ctx2]?
 doc1 \[located in ctx2\] since [0-9]+ onwards
 
 
-wants is exists withsubject person andcanbe that a person, do a content_action.
-is_allowed is exists withsubject person andcanbe to a content_action.
+person can wants (exists) that a person, do a content_action.
+person can is_allowed (exists) to a content_action.
 
 if:
    Person1 [wants that Person1, do [Content_action1]];
@@ -57,26 +57,26 @@ sue [view what doc1]?
 sue \[view what doc1\] at [0-9]+
 
 
-can is exists withsubject person
-              andcanbe what a verb,
-                       where a context.
+person can ca_n (exists)
+              what a verb,
+              where a context.
 
 
 if:
    Person1 [wants that Person1, do [Content_actionVerb1 what Content1]];
-   Person1 [can what Content_actionVerb1, where Context1];
+   Person1 [ca_n what Content_actionVerb1, where Context1];
    Content1 [located in Context1];
 then:
    Person1 [Content_actionVerb1 what Content1].
 
 
 mary [wants that mary, do [view what doc1]].
-mary [can what view, where ctx1].
+mary [ca_n what view, where ctx1].
 
 
-wf_action is content_action.
-publish is wf_action.
-hide is wf_action.
+person can wf_action (content_action).
+person can publish (wf_action).
+person can hide (wf_action).
 
 
 status are thing.
@@ -87,20 +87,20 @@ private isa status.
 workflow are thing.
 
 
-is_assigned is exists withsubject workflow
-                      andcanbe to a noun,
-                               in a context.
+workflow can is_assigned (exists)
+                      to a noun,
+                      in a context.
 
 
 transition are thing.
 
-has is exists withsubject thing andcanbe what a thing.
+thing can has (exists) what a thing.
 
 
-executed is exists withsubject transition
-                   andcanbe by a verb,
-                            fro_m a status,
-                            to a status.
+transition can executed (exists)
+                   by a verb,
+                   fro_m a status,
+                   to a status.
 
 
 role are thing.
@@ -113,10 +113,10 @@ basic_perm isa permission.
 edit_perm isa permission.
 manage_perm isa permission.
 
-is_protected is exists withsubject verb
-                       andcanbe by a permission,
-                                in a context,
-                                for a status.
+verb can is_protected (exists)
+                       by a permission,
+                       in a context,
+                       for a status.
 
 if:
    Person1 [wants that Person1, do [Content_actionVerb1 what Content1]] at I1;

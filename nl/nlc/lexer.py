@@ -1,9 +1,4 @@
 """
-
-<common noun> is <common noun> [, <common noun> ...].
-
-<verb> is <verb> [, <verb> ...] [that can be <prep> <symbol> [, <prep> <symbol> ...]].
-
 """
 
 import ply.lex as lex
@@ -27,9 +22,8 @@ tokens = (
     'EXTEND',
     'ARE',
     'IS',
-    'ANDCANBE',
     'A',
-    'WITHSUBJECT',
+    'CAN',
     'IF',
     'THEN',
     'COLON',
@@ -57,9 +51,8 @@ reserved = {
     'extend': 'EXTEND',
     'are': 'ARE',
     'is': 'IS',
-    'andcanbe': 'ANDCANBE',
     'a': 'A',
-    'withsubject': 'WITHSUBJECT',
+    'can': 'CAN',
     'if': 'IF',
     'then': 'THEN',
     'finish': 'FINISH',

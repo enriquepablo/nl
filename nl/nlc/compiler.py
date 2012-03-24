@@ -303,7 +303,6 @@ def p_noun_def(p):
         cls = nl.Noun(name, bases=tuple(superclasses), newdict={})
     except ValueError:
         raise CompileError('ilegal name for noun: ' % (p[1]))
-    nl.utils.register(name, cls)
     p[0] = 'Noun %s defined.' % name
  
 def p_terms(p):
@@ -326,12 +325,10 @@ def p_name_def(p):
     p[0] = cls(p[1])
 
 def p_verb_def(p):
-    '''verb-def : TERM IS verbs WITHSUBJECT TERM ANDCANBE modification-def
-                | TERM IS verbs WITHSUBJECT TERM
-                | TERM IS verbs ANDCANBE modification-def
-                | TERM IS verbs'''
+    '''verb-def : TERM CAN TERM LPAREN verbs RPAREN modification-def
+                | TERM CAN TERM LPAREN verbs RPAREN'''
     superclasses = []
-    for v in p[3]:
+    for v in p[5]:
         try:
             superclass = nl.utils.get_class(v)
         except KeyError:
@@ -340,20 +337,15 @@ def p_verb_def(p):
             raise CompileError('this is not a verb: ' + v)
         superclasses.append(superclass)
     newdict = {}
-    if len(p) > 4 and p[4] != 'andcanbe':
-        try:
-            nclass = nl.utils.get_class(p[5])
-        except KeyError:
-            raise CompileError('unknown word for subject: ' + p[5])
-        newdict['subject'] = nclass
-    if len(p) == 6 and p[4] == 'andcanbe':
-        newdict['mods'] = p[5]
+    try:
+        nclass = nl.utils.get_class(p[1])
+    except KeyError:
+        raise CompileError('unknown word for subject: ' + p[5])
+    newdict['subject'] = nclass
     if len(p) == 8:
         newdict['mods'] = p[7]
-    name = p[1].capitalize()
+    name = p[3].capitalize()
     vclass = nl.Verb(name, bases=tuple(superclasses), newdict=newdict)
-
-    nl.utils.register(name, vclass)
     p[0] = 'Verb %s defined.' % name
  
 def p_verbs(p):
