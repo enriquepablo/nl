@@ -8,7 +8,6 @@ tokens = (
     'QMARK',
     'ISA',
     'TERM',
-    'LABEL',
     'VAR',
     'NUMBER',
     'TIME',
@@ -36,10 +35,20 @@ tokens = (
     'MAXSTART',
     'MINEND',
     'LPAREN',
+    'RCURL',
+    'LCURL',
     'RPAREN',
     'SUBWORDOF',
     'PASSTIME',
     'UNTIL',
+    'PLUS',
+    'MINUS',
+    'PRODUCT',
+    'DIVISION',
+    'LT',
+    'GT',
+    'EQ',
+    'NEQ',
 )
 
 reserved = {
@@ -78,25 +87,21 @@ from nl.utils import t_VAR
 t_NUMBER = r'(\d+)'
 t_LPAREN = r'\('
 t_RPAREN = r'\)'
+t_LCURL = r'\{'
+t_RCURL = r'\}'
+t_PLUS = r'\+'
+t_MINUS = r'-'
+t_PRODUCT = r'\*'
+t_DIVISION = r'/'
+t_LT = r'<'
+t_GT = r'>'
+t_EQ = r'='
+t_NEQ = r'<>'
 
 
 def t_TERM(t):
     r'[a-z][a-z_]*\d*'
     t.type = reserved.get(t.value, 'TERM')    # Check for reserved words
-    return t
-
-def t_LABEL(t):
-    r'[a-z]+'
-    t.type = reserved.get(t.value, 'LABEL')    # Check for reserved words
-    return t
-
-def t_TIME(t):
-    r'\d+'
-    try:
-        t.value = int(t.value)
-    except ValueError:
-        print "Invalid date: %s" % t.value
-        t.value = 0
     return t
 
 # Define a rule so we can track line numbers

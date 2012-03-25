@@ -150,7 +150,7 @@ def p_time(p):
         p[0] = nl.Duration(start='now', end=nl.Min_end(*p[2]))
 
 def p_instant(p):
-    '''instant : TIME
+    '''instant : arith
                | VAR
                | NOW
                | MAXSTART durations
@@ -160,7 +160,7 @@ def p_instant(p):
     elif p[1] == 'minend':
         p[0] = nl.Min_end(*p[2])
     else:
-        if VAR_PAT.match(p[1]):
+        if isinstance(p[1], basestring) and VAR_PAT.match(p[1]):
             var = _from_var(p[1])
             if not isinstance(var, nl.Instant):
                 raise CompileError('invalid variable name for instant: %s' % p[1])
@@ -240,15 +240,13 @@ def p_modifier(p):
  
 def p_object(p):
     '''object : TERM
-              | NUMBER
+              | arith
               | VAR
               | predicate
               | varvar'''
     if isinstance(p[1], basestring):
         if VAR_PAT.match(p[1]):
             p[0] = _from_var(p[1])
-        elif NUM_PAT.match(p[1]):
-            p[0] = nl.Number(p[1])
         else:
             obj = nl.kb.get_symbol(p[1])
             if isinstance(obj, basestring):
@@ -326,17 +324,22 @@ def p_name_def(p):
 
 def p_verb_def(p):
     '''verb-def : A TERM CAN TERM LPAREN verbs RPAREN modification-def
+                | A TERM CAN TERM modification-def
                 | A TERM CAN TERM LPAREN verbs RPAREN'''
     superclasses = []
-    for v in p[6]:
-        try:
-            superclass = nl.utils.get_class(v)
-        except KeyError:
-            raise CompileError('unknown name for verb: ' + v)
-        if not issubclass(superclass, nl.Exists):
-            raise CompileError('this is not a verb: ' + v)
-        superclasses.append(superclass)
     newdict = {}
+    if len(p) == 6:
+        superclasses.append(nl.Exists)
+        newdict['mods'] = p[5]
+    else:
+        for v in p[6]:
+            try:
+                superclass = nl.utils.get_class(v)
+            except KeyError:
+                raise CompileError('unknown name for verb: ' + v)
+            if not issubclass(superclass, nl.Exists):
+                raise CompileError('this is not a verb: ' + v)
+            superclasses.append(superclass)
     try:
         nclass = nl.utils.get_class(p[2])
     except KeyError:
@@ -394,7 +397,8 @@ def p_condition(p):
                  | name-def
                  | coincidence
                  | during
-                 | subword'''
+                 | subword
+                 | arith-condition'''
     p[0] = p[1]
 
 def p_coincidence(p):
@@ -466,6 +470,55 @@ def p_end_duration(p):
         p[0] = nl.Finish(dur, nl.Instant('now'))
     else:
         p[0] = nl.Finish(dur, p[4])
+
+
+# Arithmetics
+
+def p_arith(p):
+    '''arith : NUMBER
+             | LCURL arith-operation RCURL'''
+    if len(p) == 2:
+        p[0] = nl.Number(p[1])
+    else:
+        p[0] = p[2]
+
+def p_arith_operation(p):
+    '''arith-operation : arith-operand arith-operator arith-operation
+                       | arith-operand arith-operator arith-operand'''
+    p[0] = nl.Number(p[2], arg1=p[1], arg2=p[3])
+
+def p_arith_operand(p):
+    '''arith-operand : NUMBER
+                     | VAR
+                     | LPAREN arith-operation RPAREN'''
+    if len(p) == 4:
+        p[0] = p[2]
+    elif VAR_PAT.match(p[1]):
+        p[0] = _from_var(p[1])
+    else:
+        p[0] = nl.Number(p[1])
+
+def p_arith_operator(p):
+    '''arith-operator : PLUS
+                      | MINUS
+                      | PRODUCT
+                      | DIVISION'''
+    p[0] = p[1]
+
+def p_arith_condition(p):
+    '''arith-condition : LCURL arith-predication RCURL'''
+    p[0] = p[2]
+
+def p_arith_predication(p):
+    '''arith-predication : arith-operand arith-predicate arith-operand'''
+    p[0] = nl.Arith(p[2], arg1=p[1], arg2=p[3])
+
+def p_arith_predicate(p):
+    '''arith-predicate : LT
+                       | GT
+                       | EQ
+                       | NEQ'''
+    p[0] = p[1]
 
 # Error rule for syntax errors
 def p_error(p):

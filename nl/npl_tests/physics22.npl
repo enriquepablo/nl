@@ -1,0 +1,43 @@
+
+body are thing.
+
+a body can has_mass kg a number.
+
+a body can has_position x a number, y a number.
+
+a body can has_speed x a number, y a number.
+
+a body can has_acceleration x a number, y a number.
+
+a body can is_forced x a number, y a number.
+
+if:
+    Body1 [has_position x N1, y N2] at I1;
+    Body1 [has_speed x N3, y N4] at I1;
+    {I1 < 33};
+then:
+    Body1 [has_position x {N1 + N3}, y {N2 + N4}] at {I1 + 1}.
+
+if:
+    Body1 [has_speed x N1, y N2] at I1;
+    Body1 [has_acceleration x N3, y N4] at I1;
+    {I1 < 33};
+then:
+    Body1 [has_speed x {N1 + N3}, y {N2 + N4}] at {I1 + 1}.
+
+if:
+    Body1 [has_mass kg N1] at I1;
+    Body1 [is_forced x N2, y N3] at I1;
+    {I1 < 33};
+then:
+    Body1 [has_acceleration x {N2 / N1}, y {N3 / N1}] at {I1 + 1}.
+
+if:
+    Body1 [has_position x N1, y N2] at I1;
+    Body1 [has_mass kg N3] at I1;
+    Body2 [has_position x N4, y N5] at I1;
+    Body2 [has_mass kg N6] at I1;
+#    different Body1, Body2;
+    {I1 < 33};
+then:
+    Body1 [is_forced x {0 - ((N3 * N6) / (N1 - N4))}, y {0 - ((N3 * N6) / (N2 - N5))}] at {I1 + 1}.

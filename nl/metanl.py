@@ -517,6 +517,9 @@ class Number(Namable):
     of numbers when it is a string representing an operation.
     """
     def __init__(self, value, arg1='', arg2=''):
+        if isinstance(value, Number):
+            self.value, self.arg1, self.arg2 = value.value, value.arg1, value.arg2
+            return
         self.arg1 = str(arg1)
         self.arg2 = str(arg2)
         try:
@@ -530,9 +533,9 @@ class Number(Namable):
             else:
                 self.value = value
                 if self.arg1 != '':
-                    self.arg1 = isinstance(arg1, Number) and arg1 or Number(arg1)
+                    self.arg1 = Number(arg1)
                 if self.arg2 != '':
-                    self.arg2 = isinstance(arg2, Number) and arg2 or Number(arg2)
+                    self.arg2 = Number(arg2)
 
     @classmethod
     def from_clips(cls, instance):
