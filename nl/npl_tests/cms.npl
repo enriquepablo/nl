@@ -15,12 +15,12 @@ img2 isa image.
 ctx1 isa context.
 ctx2 isa context.
 
-person can content_action (exists) what a content.
-person can view (content_action).
-person can edit (content_action).
-person can owns (content_action).
+a person can content_action (exists) what a content.
+a person can view (content_action).
+a person can edit (content_action).
+a person can owns (content_action).
 
-thing can located (exists) in a context.
+a thing can located (exists) in a context.
 
 if:
    Thing1 [located in Context1] D1;
@@ -38,8 +38,8 @@ doc1 [located in ctx2]?
 doc1 \[located in ctx2\] since [0-9]+ onwards
 
 
-person can wants (exists) that a person, do a content_action.
-person can is_allowed (exists) to a content_action.
+a person can wants (exists) that a person, do a content_action.
+a person can is_allowed (exists) to a content_action.
 
 if:
    Person1 [wants that Person1, do [Content_action1]];
@@ -57,26 +57,26 @@ sue [view what doc1]?
 sue \[view what doc1\] at [0-9]+
 
 
-person can ca_n (exists)
+a person can may (exists)
               what a verb,
               where a context.
 
 
 if:
    Person1 [wants that Person1, do [Content_actionVerb1 what Content1]];
-   Person1 [ca_n what Content_actionVerb1, where Context1];
+   Person1 [may what Content_actionVerb1, where Context1];
    Content1 [located in Context1];
 then:
    Person1 [Content_actionVerb1 what Content1].
 
 
 mary [wants that mary, do [view what doc1]].
-mary [ca_n what view, where ctx1].
+mary [may what view, where ctx1].
 
 
-person can wf_action (content_action).
-person can publish (wf_action).
-person can hide (wf_action).
+a person can wf_action (content_action).
+a person can publish (wf_action).
+a person can hide (wf_action).
 
 
 status are thing.
@@ -87,17 +87,17 @@ private isa status.
 workflow are thing.
 
 
-workflow can is_assigned (exists)
+a workflow can is_assigned (exists)
                       to a noun,
                       in a context.
 
 
 transition are thing.
 
-thing can has (exists) what a thing.
+a thing can has (exists) what a thing.
 
 
-transition can executed (exists)
+a transition can executed (exists)
                    by a verb,
                    fro_m a status,
                    to a status.
@@ -113,7 +113,7 @@ basic_perm isa permission.
 edit_perm isa permission.
 manage_perm isa permission.
 
-verb can is_protected (exists)
+a verb can is_protected (exists)
                        by a permission,
                        in a context,
                        for a status.

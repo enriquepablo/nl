@@ -1,5 +1,5 @@
 
-thing can transitive (exists) to a thing.
+a thing can transitive (exists) to a thing.
 
 if:
     Thing1 [TransitiveVerb1 to Thing2];
@@ -7,7 +7,7 @@ if:
 then:
     Thing1 [TransitiveVerb1 to Thing3].
     
-thing can symmetric (exists) to a thing.
+a thing can symmetric (exists) to a thing.
 
 if:
     Thing1 [SymmetricVerb1 to Thing2];
@@ -16,7 +16,7 @@ then:
 
 person are thing.
 
-person can meets (transitive, symmetric) to a person.
+a person can meets (transitive, symmetric) to a person.
 
 john isa person.
 jim isa person.

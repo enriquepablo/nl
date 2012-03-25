@@ -325,10 +325,10 @@ def p_name_def(p):
     p[0] = cls(p[1])
 
 def p_verb_def(p):
-    '''verb-def : TERM CAN TERM LPAREN verbs RPAREN modification-def
-                | TERM CAN TERM LPAREN verbs RPAREN'''
+    '''verb-def : A TERM CAN TERM LPAREN verbs RPAREN modification-def
+                | A TERM CAN TERM LPAREN verbs RPAREN'''
     superclasses = []
-    for v in p[5]:
+    for v in p[6]:
         try:
             superclass = nl.utils.get_class(v)
         except KeyError:
@@ -338,13 +338,13 @@ def p_verb_def(p):
         superclasses.append(superclass)
     newdict = {}
     try:
-        nclass = nl.utils.get_class(p[1])
+        nclass = nl.utils.get_class(p[2])
     except KeyError:
-        raise CompileError('unknown word for subject: ' + p[5])
+        raise CompileError('unknown word for subject: ' + p[2])
     newdict['subject'] = nclass
-    if len(p) == 8:
-        newdict['mods'] = p[7]
-    name = p[3].capitalize()
+    if len(p) == 9:
+        newdict['mods'] = p[8]
+    name = p[4].capitalize()
     vclass = nl.Verb(name, bases=tuple(superclasses), newdict=newdict)
     p[0] = 'Verb %s defined.' % name
  
