@@ -26,18 +26,36 @@ then:
     Body1 [has_speed x {N1 + N3}, y {N2 + N4}] at {I1 + 1}.
 
 if:
-    Body1 [has_mass kg N1] at I1;
+    Body1 [has_mass kg N1] D1;
     Body1 [is_forced x N2, y N3] at I1;
     {I1 < 33};
+    I1 during D1;
 then:
-    Body1 [has_acceleration x {N2 / N1}, y {N3 / N1}] at {I1 + 1}.
+    Body1 [has_acceleration x {N2 / N1}, y {N3 / N1}] at I1.
 
 if:
     Body1 [has_position x N1, y N2] at I1;
-    Body1 [has_mass kg N3] at I1;
+    Body1 [has_mass kg N3] D1;
     Body2 [has_position x N4, y N5] at I1;
-    Body2 [has_mass kg N6] at I1;
-#    different Body1, Body2;
+    Body2 [has_mass kg N6] D2;
+    distinct Body1, Body2;
     {I1 < 33};
+    I1 during D1;
+    I1 during D2;
 then:
-    Body1 [is_forced x {0 - ((N3 * N6) / (N1 - N4))}, y {0 - ((N3 * N6) / (N2 - N5))}] at {I1 + 1}.
+    Body1 [is_forced x {0 - ((N3 * N6) / (N1 - N4))}, y {0 - ((N3 * N6) / (N2 - N5))}] at I1.
+
+
+body1 isa body.
+body1 [has_mass kg 2] since 1 onwards.
+body1 [has_position x 2, y 2] at 1.
+body1 [has_speed x 2, y 2] at 1.
+body2 isa body.
+body2 [has_mass kg 2] since 1 onwards.
+body2 [has_position x -2, y -2] at 1.
+body2 [has_speed x 2, y -2] at 1.
+
+extend.
+
+body1 [has_position x N1, y N2] at 32?
+body1 \[has_position y -?[0-9\.]+, x -?[0-9\.]+\] at 32

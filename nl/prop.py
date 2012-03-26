@@ -171,10 +171,7 @@ def factback(csubj, cpred, ctime, ctruth, fr):
     except clips.ClipsError:
         subj = Word.from_clips(csubj)
     pred = Namable.from_clips(cpred)
-    try:
-        t = Time.from_clips(ctime)
-    except:
-        t = Instant(10)
+    t = Time.from_clips(ctime)
     truth = int(str(ctruth))
     fact = Fact(subj, pred, t, truth=truth)
     pred.in_fact(fact, fr)

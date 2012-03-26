@@ -398,7 +398,8 @@ def p_condition(p):
                  | coincidence
                  | during
                  | subword
-                 | arith-condition'''
+                 | arith-condition
+                 | distinct-condition'''
     p[0] = p[1]
 
 def p_coincidence(p):
@@ -519,6 +520,19 @@ def p_arith_predicate(p):
                        | EQ
                        | NEQ'''
     p[0] = p[1]
+
+
+def p_distinct_condition(p):
+    '''distinct-condition : DISTINCT objects'''
+    p[0] = nl.Distinct(*p[2])
+
+def p_objects(p):
+    '''objects : object COMMA objects
+               | object'''
+    if len(p) == 2:
+        p[0] = [p[1]]
+    else:
+        p[0] = [p[1]] + p[3]
 
 # Error rule for syntax errors
 def p_error(p):

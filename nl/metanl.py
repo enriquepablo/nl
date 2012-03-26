@@ -519,23 +519,23 @@ class Number(Namable):
     def __init__(self, value, arg1='', arg2=''):
         if isinstance(value, Number):
             self.value, self.arg1, self.arg2 = value.value, value.arg1, value.arg2
-            return
-        self.arg1 = str(arg1)
-        self.arg2 = str(arg2)
-        try:
-            self.value = str(float(value))
-        except (ValueError, TypeError):
-            if value[0] == '(':
-                args = utils.parens(value)
-                self.value = args[0]
-                self.arg1 = Number(args[1])
-                self.arg2 = Number(args[2])
-            else:
-                self.value = value
-                if self.arg1 != '':
-                    self.arg1 = Number(arg1)
-                if self.arg2 != '':
-                    self.arg2 = Number(arg2)
+        else:
+            self.arg1 = str(arg1)
+            self.arg2 = str(arg2)
+            try:
+                self.value = str(float(value))
+            except (ValueError, TypeError):
+                if value[0] == '(':
+                    args = utils.parens(value)
+                    self.value = args[0]
+                    self.arg1 = Number(args[1])
+                    self.arg2 = Number(args[2])
+                else:
+                    self.value = value
+                    if self.arg1 != '':
+                        self.arg1 = Number(arg1)
+                    if self.arg2 != '':
+                        self.arg2 = Number(arg2)
 
     @classmethod
     def from_clips(cls, instance):
@@ -587,6 +587,17 @@ class Number(Namable):
     def __str__(self):
         return self._get_number({})
 
+    def tonl(self):
+        """
+        """
+        if utils.varpat.match(self.value):
+            return utils.var_tonl(self)
+        try:
+            return str(float(self.value))
+        except ValueError:
+            arg1 = self.arg1 != '' and self.arg1._get_number({}) or ''
+            arg2 = self.arg2 != '' and self.arg2._get_number({}) or ''
+            return '(%s %s %s)' % (arg1, self.value, arg2)
 
 
 class Arith(Number):
@@ -816,3 +827,23 @@ class Or(Bi_conn_mixin):
 
     def get_ce(self, vrs=None):
         return self._get_ce(vrs, conn='or')
+
+
+class Distinct(Namable):
+
+    def __init__(self, *args):
+        self.args = args
+
+    def get_ce(self, vrs=None):
+        args = [arg.put(vrs) for arg in self.args]
+        ineqs = []
+        while args:
+            arg = args.pop()
+            if args:
+                ineqs.append('(neq %s %s)' % (arg, ' '.join(args)))
+        if len(ineqs) == 1:
+            return '(test %s)' % ' '.join(ineqs)
+        elif len(ineqs) > 1:
+            return '(test (and %s))' % ' '.join(ineqs)
+        else:
+            raise ValueError('not enough arguments for Distinct')

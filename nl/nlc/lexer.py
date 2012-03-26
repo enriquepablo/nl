@@ -49,6 +49,7 @@ tokens = (
     'GT',
     'EQ',
     'NEQ',
+    'DISTINCT',
 )
 
 reserved = {
@@ -74,6 +75,7 @@ reserved = {
     'subwordof': 'SUBWORDOF',
     'passtime': 'PASSTIME',
     'until': 'UNTIL',
+    'distinct': 'DISTINCT',
 }
 
 t_COMMA = r','
@@ -84,7 +86,7 @@ t_RBRACK = r'\]'
 t_COLON = r':'
 t_SEMICOLON = r';'
 from nl.utils import t_VAR
-t_NUMBER = r'(\d+)'
+t_NUMBER = r'(-?\d+)'
 t_LPAREN = r'\('
 t_RPAREN = r'\)'
 t_LCURL = r'\{'

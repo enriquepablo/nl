@@ -35,7 +35,7 @@ class Time(Namable):
     def from_clips(cls, instance):
         if not isinstance(instance, clips._clips_wrap.Instance):
             try:
-                return Instant(str(float(instance)))
+                return Instant(float(str(instance)))
             except ValueError:
                 instance = clips.FindInstance(instance)
         return Duration.from_clips(instance)
@@ -101,7 +101,8 @@ class Instant(Time, Number):
             if float(val) == utils._now:
                 return '(python-call ptime)'
         except ValueError:
-            return val
+            pass
+        return val
 
 
 class Duration(Time):
@@ -166,11 +167,11 @@ class Duration(Time):
         if utils.varpat.match(self.value):
             return self.get_var_slot_constraint(vrs, self.value)
         newvar = utils._newvar()
-        constraint = '?'+newvar
-        c = self.start.get_constraint(vrs, newvar, ['start'])
-        if c:
-            constraint += '&:(eq (send ?%s get-start) %s)' % (newvar, c)
-        constraint += '&:(eq (send ?%s get-end) -1.0)' % (newvar)
+        constraint = '?' + newvar
+        for x in ('start', 'end'):
+            x_constraint = getattr(self, x).get_constraint(vrs, newvar, [x])
+            if x_constraint:
+                constraint += '&:(eq (send ?%s get-%s) %s)' % (newvar, x, x_constraint)
         return constraint
 
     def put(self, vrs, make=True):
@@ -430,7 +431,7 @@ class Past(Instant_op_mixin):
     init'd with an instant, returns true if
     the instant is in the past
     """
-    def get_ce(vrs):
+    def get_ce(self, vrs):
         i = self.instant.put(vrs)
         return '''(test (and (neq %s -1.0)
                              (< %s (python-call ptime))))''' % (i, i)
@@ -440,7 +441,7 @@ class Present(Instant_op_mixin):
     init'd with an instant, returns true if
     the instant is the present
     """
-    def get_ce(vrs):
+    def get_ce(self, vrs):
         i = self.instant.put(vrs)
         return '''(test (or (eq %s -1.0)
                             (eq %s (python-call ptime))))''' % (i, i)
@@ -450,7 +451,7 @@ class Future(Instant_op_mixin):
     init'd with an instant, returns true if
     the instant is in the future
     """
-    def get_ce(vrs):
+    def get_ce(self, vrs):
         i = self.instant.put(vrs)
         return '''(test (> %s (python-call ptime)))''' % (i, i)
 
