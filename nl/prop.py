@@ -157,15 +157,14 @@ class Fact(Namable):
     def sen_tonl(self):
         """
         """
-        return '%s %s %s' % (getattr(self.subject, 'tonl_cls',
+        truth = '%s %s %s' % (getattr(self.subject, 'tonl_cls',
                                      self.subject.tonl)(),
                              self.predicate.tonl(),
                              self.time.tonl())
+        return self.truth and truth or 'not ' + truth
 
 
-def factback(csubj, cpred, ctime, ctruth, fr):
-    """
-    """
+def get_fact(csubj, cpred, ctime, ctruth):
     try:
         subj = Namable.from_clips(csubj)
     except clips.ClipsError:
@@ -174,8 +173,33 @@ def factback(csubj, cpred, ctime, ctruth, fr):
     t = Time.from_clips(ctime)
     truth = int(str(ctruth))
     fact = Fact(subj, pred, t, truth=truth)
-    pred.in_fact(fact, fr)
+    return fact
+
+
+def factback(csubj, cpred, ctime, ctruth, fr):
+    """
+    """
+    fact = get_fact(csubj, cpred, ctime, ctruth)
+    fact.predicate.in_fact(fact, fr)
     for plugin in utils.plugins:
         plugin(fact)
 
 clips.RegisterPythonFunction(factback)
+
+
+class Contradiction(Exception):
+    def __init__(self, fact):
+        self.fact = fact
+    def __str__(self):
+        return 'Contradiction with: ' + self.fact.tonl()
+
+
+def raise_contradiction(csubj, cpred, ctime, ctruth):
+    """
+    """
+    fact = get_fact(csubj, cpred, ctime, ctruth)
+    e = Contradiction(fact)
+    logger.error(str(e))
+    raise e
+
+clips.RegisterPythonFunction(raise_contradiction)

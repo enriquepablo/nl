@@ -50,6 +50,7 @@ tokens = (
     'EQ',
     'NEQ',
     'DISTINCT',
+    'NOT',
 )
 
 reserved = {
@@ -76,6 +77,7 @@ reserved = {
     'passtime': 'PASSTIME',
     'until': 'UNTIL',
     'distinct': 'DISTINCT',
+    'not': 'NOT',
 }
 
 t_COMMA = r','

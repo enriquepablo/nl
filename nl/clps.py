@@ -285,17 +285,8 @@ clips.Build(_fact_clp)
 
 #clips.RegisterPythonFunction(ptonl)
 
-if conf.with_callback:
-    import utils
-    utils.load_plugins()
-    callback = '(python-call factback ?s ?p ?t ?r "add")'
-else:
-    callback = ''
-
-_add_prop = '''
-(deffunction add-prop (?s ?p ?t ?r)
-       (bind ?count 0)
-       (do-for-all-instances ((?prop Fact))
+_getfacts_clp = '''(deffunction get-facts (?s ?p ?t ?r)
+                       (return (find-all-instances ((?prop Fact))
                           (and (eq ?prop:subject ?s)
                                (eq ?prop:predicate ?p)
                                (or (and (eq (class ?t) Duration)
@@ -307,8 +298,22 @@ _add_prop = '''
                                             (and (<> (send ?t get-end) -1.0)
                                                 (>= (send (send ?prop get-time) get-end) (send ?t get-end)))))
                                    (eq ?prop:time ?t))
-                               (= ?prop:truth ?r))
-               (bind ?count (+ ?count 1))
+                               (= ?prop:truth ?r)))))
+'''
+logger.info(_getfacts_clp)
+clips.Build(_getfacts_clp)
+
+if conf.with_callback:
+    import utils
+    utils.load_plugins()
+    callback = '(python-call factback ?s ?p ?t ?r "add")'
+else:
+    callback = ''
+
+_add_prop = '''
+(deffunction add-prop (?s ?p ?t ?r)
+       (bind ?facts (get-facts ?s ?p ?t ?r))
+       (progn$ (?prop ?facts)
                (bind ?dur (send ?prop get-time))
                (if (eq (class ?dur) Duration)
                 then (bind ?family (first$ (send ?t get-families)))
@@ -323,8 +328,13 @@ _add_prop = '''
                (bind ?pred (send ?prop get-predicate))
                (send ?pred put-refs (+ 1 (send ?pred get-refs)))
         )
-        (if (= ?count 0)
-            then (bind ?fact (make-instance of Fact (subject ?s)
+        (if (= (length$ ?facts) 0)
+            then (if (= ?r 0)
+                     then (bind ?neg (get-facts ?s ?p ?t 1))
+                          (if (> (length$ ?neg) 0)
+                              then (python-call raise_contradiction ?s ?p ?t ?r))
+                    )
+                 (bind ?fact (make-instance of Fact (subject ?s)
                                                     (predicate ?p)
                                                     (time ?t)
                                                     (truth ?r)))

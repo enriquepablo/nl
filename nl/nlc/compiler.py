@@ -90,14 +90,19 @@ def p_assertion(p):
     p[0] = str(response)
 
 def p_fact(p):
-    '''fact : subject predicate
-            | subject predicate time'''
-    if len(p) == 3:
-        args = (p[1], p[2])
+    '''fact : truth
+            | NOT truth'''
+    if p[1] == 'not':
+        p[2].truth = 0
+        p[0] = p[2]
     else:
-        args = (p[1], p[2], p[3])
+        p[0] = p[1]
+
+def p_truth(p):
+    '''truth : subject predicate
+             | subject predicate time'''
     try:
-        p[0] = nl.Fact(*args)
+        p[0] = nl.Fact(*p[1:])
     except ValueError, e:
         raise CompileError(e.args[0])
 
@@ -315,12 +320,19 @@ def _terms(p):
         p[0] = [p[1]]
 
 def p_name_def(p):
-    'name-def : TERM ISA TERM'
-    try:
-        cls = nl.utils.get_class(p[3])
-    except KeyError:
-        raise CompileError('unknown noun: %s' % p[3])
-    p[0] = cls(p[1])
+    '''name-def : TERM ISA TERM
+                | VAR ISA TERM'''
+    if isinstance(p[1], basestring):
+        if VAR_PAT.match(p[1]):
+            p[0] = _from_var(p[1])
+        else:
+            try:
+                cls = nl.utils.get_class(p[3])
+            except KeyError:
+                raise CompileError('unknown noun: %s' % p[3])
+            p[0] = cls(p[1])
+    else:
+        p[0] = p[1]
 
 def p_verb_def(p):
     '''verb-def : A TERM CAN TERM LPAREN verbs RPAREN modification-def

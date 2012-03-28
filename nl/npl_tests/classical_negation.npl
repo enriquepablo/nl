@@ -1,0 +1,27 @@
+
+person are thing.
+
+hair_color are thing.
+blonde isa hair_color.
+ginger isa hair_color.
+
+a person can has hair a hair_color.
+
+if:
+    Hair_color1 isa hair_color;
+    Person1 [has hair Hair_color2];
+    distinct Hair_color1, Hair_color2;
+then:
+    not Person1 [has hair Hair_color1].
+
+john isa person.
+
+john [has hair blonde].
+
+not john [has hair ginger]?
+False
+
+extend.
+
+not john [has hair ginger]?
+not john \[has hair ginger\] at [0-9\.-]+
