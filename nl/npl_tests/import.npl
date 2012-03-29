@@ -1,0 +1,10 @@
+
+import "https://raw.github.com/enriquepablo/nl/master/nl/npl_tests/cms_bare.npl".
+
+john [wants that john, do [publish what doc1]].
+
+extend.
+
+john [publish what doc1]?
+john \[publish what doc1\] at [0-9]+
+

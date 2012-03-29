@@ -1,6 +1,7 @@
 """
 """
 import re
+import urllib2
 from collections import defaultdict
 import nl
 import ply.yacc as yacc
@@ -65,6 +66,24 @@ def p_passtime(p):
              | NOW DOT'''
     response = nl.now()
     p[0] = str(response)
+
+def p_import(p):
+    'order : IMPORT URI DOT'
+    uri = p[2][1:-1]
+    try:
+        remote = urllib2.urlopen(uri)
+    except:
+        raise
+    buff = ''
+    for sen in remote.readlines():
+        sen = sen.strip()
+        if sen and not sen.startswith('#'):
+            buff += ' ' + sen
+            if buff.endswith('.'):
+                yacc.parse(buff)
+                buff = ''
+    p[0] = 'Contents of %s imported' % uri
+
 
 def p_question(p):
     '''question : fact QMARK

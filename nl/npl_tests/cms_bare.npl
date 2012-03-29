@@ -1,0 +1,152 @@
+person are thing.
+content are thing.
+document are content.
+image are content.
+context are thing.
+
+john isa person.
+sue isa person.
+pete isa person.
+mary isa person.
+doc1 isa document.
+doc2 isa document.
+img1 isa image.
+img2 isa image.
+ctx1 isa context.
+ctx2 isa context.
+
+a person can content_action (exists) what a content.
+a person can view (content_action).
+a person can edit (content_action).
+a person can owns (content_action).
+
+a thing can located (exists) in a context.
+
+if:
+   Thing1 [located in Context1] D1;
+   Context1 [located in Context2] D2;
+then:
+   Thing1 [located in Context2] until D1, D2.
+
+a person can wants (exists) that a person, do a content_action.
+a person can is_allowed (exists) to a content_action.
+
+if:
+   Person1 [wants that Person1, do [Content_action1]];
+   Person1 [is_allowed to [Content_action1]];
+then:
+   Person1 [Content_action1].
+
+a person can may (exists)
+              what a verb,
+              where a context.
+
+
+if:
+   Person1 [wants that Person1, do [Content_actionVerb1 what Content1]];
+   Person1 [may what Content_actionVerb1, where Context1];
+   Content1 [located in Context1];
+then:
+   Person1 [Content_actionVerb1 what Content1].
+
+a person can wf_action (content_action).
+a person can publish (wf_action).
+a person can hide (wf_action).
+
+
+status are thing.
+public isa status.
+private isa status.
+
+
+workflow are thing.
+
+
+a workflow can is_assigned (exists)
+                      to a noun,
+                      in a context.
+
+
+transition are thing.
+
+a thing can has (exists) what a thing.
+
+
+a transition can executed (exists)
+                   by a verb,
+                   fro_m a status,
+                   to a status.
+
+
+role are thing.
+manager isa role.
+editor isa role.
+visitor isa role.
+
+permission are thing.
+basic_perm isa permission.
+edit_perm isa permission.
+manage_perm isa permission.
+
+a verb can is_protected (exists)
+                       by a permission,
+                       in a context,
+                       for a status.
+
+if:
+   Person1 [wants that Person1, do [Content_actionVerb1 what Content1]] at I1;
+   Content1 [located in Context1] D1;
+   Content1 [has what Status1] D2;
+   Person1 [has what Role1] D3;
+   Role1 [has what Permission1] D4;
+   Content_actionVerb1 [is_protected by Permission1, in Context1, for Status1] D5;
+   I1 during D1, D2, D3, D4, D5;
+then:
+   Person1 [Content_actionVerb1 what Content1] at I1.
+
+if:
+   Person1 [Wf_actionVerb1 what Content1(ContentNoun1)] at I1;
+   Workflow1 [is_assigned to ContentNoun1, in Context1] D1;
+   Workflow1 [has what Transition1] D2;
+   Transition1 [executed by Wf_actionVerb1, fro_m Status1, to Status2] D3;
+   Content1 [has what Status1] D4;
+   I1 during D1, D2, D3, D4;
+then:
+   finish D4 at I1;
+   Content1 [has what Status2] since I1 until D1, D2, D3.
+
+
+manager [has what manage_perm] onwards.
+manager [has what edit_perm] onwards.
+manager [has what basic_perm] onwards.
+editor [has what edit_perm] onwards.
+editor [has what basic_perm] onwards.
+visitor [has what basic_perm] onwards.
+
+publish [is_protected by manage_perm, in ctx1, for private] onwards.
+hide [is_protected by edit_perm, in ctx1, for public] onwards.
+edit [is_protected by edit_perm, in ctx1, for private] onwards.
+edit [is_protected by manage_perm, in ctx1, for public] onwards.
+view [is_protected by edit_perm, in ctx1, for private] onwards.
+view [is_protected by basic_perm, in ctx1, for public] onwards.
+
+wf1 isa workflow.
+
+hide_tr isa transition.
+
+wf1 [has what hide_tr] onwards.
+
+publish_tr isa transition.
+
+wf1 [has what publish_tr] onwards.
+
+hide_tr [executed by hide, fro_m public, to private] onwards.
+publish_tr [executed by publish, fro_m private, to public] onwards.
+
+wf1 [is_assigned to document, in ctx1] onwards.
+
+john [has what manager] onwards.
+mary [has what editor] onwards.
+pete [has what visitor] onwards.
+
+doc1 [has what private] onwards.

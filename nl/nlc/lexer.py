@@ -51,6 +51,8 @@ tokens = (
     'NEQ',
     'DISTINCT',
     'NOT',
+    'IMPORT',
+    'URI',
 )
 
 reserved = {
@@ -78,6 +80,7 @@ reserved = {
     'until': 'UNTIL',
     'distinct': 'DISTINCT',
     'not': 'NOT',
+    'import': 'IMPORT',
 }
 
 t_COMMA = r','
@@ -101,6 +104,7 @@ t_LT = r'<'
 t_GT = r'>'
 t_EQ = r'='
 t_NEQ = r'<>'
+t_URI = r'"[^"]+"'
 
 
 def t_TERM(t):
