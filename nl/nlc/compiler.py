@@ -72,8 +72,9 @@ def p_import(p):
     uri = p[2][1:-1]
     try:
         remote = urllib2.urlopen(uri)
-    except:
-        raise
+    except Exception, e:
+        raise ImportError('Could not import %s. '
+                          'Reason: %s' % (uri, str(e)))
     buff = ''
     for sen in remote.readlines():
         sen = sen.strip()
