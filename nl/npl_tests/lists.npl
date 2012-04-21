@@ -1,0 +1,54 @@
+list are thing.
+item are thing.
+
+a item can belong in a list, position a number.
+
+a item can move in a list, to a number.
+
+
+def-macro movement: $op $pred:
+if:
+  Item1 [belong in List1, position N1] D1;
+  Item2 [belong in List1, position N2] D2;
+  Item1 [move in List1, to N3] at I1;
+  distinct Item1, Item2;
+  {N1 = (N2 $op 1)};
+  {N1 $pred N3};
+  I1 during D1, D2;
+then:
+  finish D1 at I1;
+  finish D2 at I1;
+  Item1 [belong in List1, position N2] since {I1 + 1} onwards;
+  Item2 [belong in List1, position N1] since {I1 + 1} onwards;
+  Item1 [move in List1, to N3] at {I1 + 1}.
+
+macro movement: $op - $
+                $pred < $.
+
+macro movement: $op + $
+                $pred > $.
+
+list1 isa list.
+
+item1 isa item.
+item2 isa item.
+item3 isa item.
+item4 isa item.
+
+item1 [belong in list1, position 1] onwards.
+item2 [belong in list1, position 2] onwards.
+item3 [belong in list1, position 3] onwards.
+item4 [belong in list1, position 4] onwards.
+
+item1 [move in list1, to 3] now.
+
+now.
+extend.
+
+item2 [belong in list1, position 1] now?
+item2 \[belong position 1.0, in list1\] since [0-9]+ onwards.
+
+item5 [move in list1, to 2] now.
+
+item4 [belong in list1, position 5] now?
+item4 \[belong position 5.0, in list1\] since [0-9]+ onwards.

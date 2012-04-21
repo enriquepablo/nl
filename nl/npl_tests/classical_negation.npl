@@ -42,4 +42,4 @@ False
 extend.
 
 not john [has hair ginger]?
-not john \[has hair ginger\] at [0-9\.-]+
+not john \[has hair ginger\] at [0-9\.-]+.

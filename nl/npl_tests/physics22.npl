@@ -76,4 +76,4 @@ body2 [has_speed x 2, y -2] at 1.
 extend.
 
 body1 [has_position x N1, y N2] at 32?
-body1 \[has_position y -?[0-9\.]+, x -?[0-9\.]+\] at 32
+body1 \[has_position y -?[0-9\.]+, x -?[0-9\.]+\] at 32.

@@ -26,5 +26,5 @@ john [wants that john, do [publish what doc1]].
 extend.
 
 john [publish what doc1]?
-john \[publish what doc1\] at [0-9]+
+john \[publish what doc1\] at [0-9]+.
 

@@ -17,9 +17,11 @@
 # along with any part of the nlproject.
 # If not, see <http://www.gnu.org/licenses/>.
 
-person are thing.
+from nl.nlc.preprocessor import Preprocessor
+from nl.nlc import compiler
 
-john isa person.
 
-john isa person?
-john isa person.
+def compile(s):
+    preprocessor = Preprocessor()
+    preprocessed = preprocessor.parse(s)
+    return compiler.yacc.parse(preprocessed)

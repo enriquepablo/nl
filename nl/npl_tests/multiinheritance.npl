@@ -46,4 +46,4 @@ jim [meets to tom].
 extend.
 
 tom [meets to john]?
-tom \[meets to john\] at [0-9]+
+tom \[meets to john\] at [0-9]+.

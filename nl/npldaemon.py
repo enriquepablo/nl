@@ -20,6 +20,7 @@
 import daemon
 import SocketServer
 import nl
+from nl.nlc.preprocessor import Preprocessor
 
 
 def main():
@@ -34,9 +35,10 @@ def main():
 class NlTCPHandler(SocketServer.StreamRequestHandler):
 
     def handle(self):
-        data = self.rfile.readline().strip('\n ')
-        resp = nl.yacc.parse(data)
-        if data.endswith('.'):
+        prep = Preprocessor().parse(self.rfile.read())
+        preprocessed = prep.strip('\n')
+        resp = nl.yacc.parse(preprocessed.strip('\n'))
+        if preprocessed.endswith('.'):
             nl.extend()
             nl.now()
         self.wfile.write(resp)

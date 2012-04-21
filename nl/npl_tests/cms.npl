@@ -54,7 +54,7 @@ ctx1 [located in ctx2] onwards.
 extend.
 
 doc1 [located in ctx2]?
-doc1 \[located in ctx2\] since [0-9]+ onwards
+doc1 \[located in ctx2\] since [0-9]+ onwards.
 
 
 a person can wants (exists) that a person, do a content_action.
@@ -73,7 +73,7 @@ sue [is_allowed to [view what doc1]].
 extend.
 
 sue [view what doc1]?
-sue \[view what doc1\] at [0-9]+
+sue \[view what doc1\] at [0-9]+.
 
 
 a person can may (exists)
@@ -200,29 +200,29 @@ pete [wants that pete, do [publish what doc1]].
 extend.
 
 pete [publish what doc1]?
-False
+False.
 
 doc1 [has what Status1] D1?
-doc1 \[has what private\] since [0-9]+ onwards
+doc1 \[has what private\] since [0-9]+ onwards.
 
 john [wants that john, do [publish what doc1]].
 
 extend.
 
 john [publish what doc1]?
-john \[publish what doc1\] at [0-9]+
+john \[publish what doc1\] at [0-9]+.
 
 doc1 [has what public]?
-doc1 \[has what public\] since [0-9]+ onwards
+doc1 \[has what public\] since [0-9]+ onwards.
 
 doc1 [has what public] now?
-doc1 \[has what public\] since [0-9]+ onwards
+doc1 \[has what public\] since [0-9]+ onwards.
 
 doc1 [has what public] at I1?
-doc1 \[has what public\] since [0-9]+ onwards
+doc1 \[has what public\] since [0-9]+ onwards.
 
 doc1 [has what public] D1?
-doc1 \[has what public\] since [0-9]+ onwards
+doc1 \[has what public\] since [0-9]+ onwards.
 
 now.
 
@@ -232,7 +232,7 @@ extend.
 now.
 
 doc1 [has what Status1]?
-doc1 \[has what private\] since [0-9]+ onwards
+doc1 \[has what private\] since [0-9]+ onwards.
 
 john [wants that john, do [publish what doc1]].
 
@@ -240,7 +240,7 @@ extend.
 now.
 
 doc1 [has what Status1]?
-doc1 \[has what public\] since [0-9]+ onwards
+doc1 \[has what public\] since [0-9]+ onwards.
 
 john [wants that john, do [hide what doc1]].
 
@@ -248,7 +248,7 @@ extend.
 now.
 
 doc1 [has what Status1]?
-doc1 \[has what private\] since [0-9]+ onwards
+doc1 \[has what private\] since [0-9]+ onwards.
 
 john [wants that john, do [publish what doc1]].
 
@@ -256,7 +256,7 @@ extend.
 now.
 
 doc1 [has what Status1]?
-doc1 \[has what public\] since [0-9]+ onwards
+doc1 \[has what public\] since [0-9]+ onwards.
 
 john [wants that john, do [hide what doc1]].
 
@@ -264,7 +264,7 @@ extend.
 now.
 
 doc1 [has what Status1]?
-doc1 \[has what private\] since [0-9]+ onwards
+doc1 \[has what private\] since [0-9]+ onwards.
 
 john [wants that john, do [publish what doc1]].
 
@@ -272,7 +272,7 @@ extend.
 now.
 
 doc1 [has what Status1]?
-doc1 \[has what public\] since [0-9]+ onwards
+doc1 \[has what public\] since [0-9]+ onwards.
 
 john [wants that john, do [hide what doc1]].
 
@@ -280,7 +280,7 @@ extend.
 now.
 
 doc1 [has what Status1]?
-doc1 \[has what private\] since [0-9]+ onwards
+doc1 \[has what private\] since [0-9]+ onwards.
 
 john [wants that john, do [publish what doc1]].
 
@@ -288,7 +288,7 @@ extend.
 now.
 
 doc1 [has what Status1]?
-doc1 \[has what public\] since [0-9]+ onwards
+doc1 \[has what public\] since [0-9]+ onwards.
 
 john [wants that john, do [hide what doc1]].
 
@@ -296,7 +296,7 @@ extend.
 now.
 
 doc1 [has what Status1]?
-doc1 \[has what private\] since [0-9]+ onwards
+doc1 \[has what private\] since [0-9]+ onwards.
 
 john [wants that john, do [publish what doc1]].
 
@@ -304,7 +304,7 @@ extend.
 now.
 
 doc1 [has what Status1]?
-doc1 \[has what public\] since [0-9]+ onwards
+doc1 \[has what public\] since [0-9]+ onwards.
 
 john [wants that john, do [hide what doc1]].
 
@@ -312,7 +312,7 @@ extend.
 now.
 
 doc1 [has what Status1]?
-doc1 \[has what private\] since [0-9]+ onwards
+doc1 \[has what private\] since [0-9]+ onwards.
 
 john [wants that john, do [publish what doc1]].
 
@@ -320,7 +320,7 @@ extend.
 now.
 
 doc1 [has what Status1]?
-doc1 \[has what public\] since [0-9]+ onwards
+doc1 \[has what public\] since [0-9]+ onwards.
 
 john [wants that john, do [hide what doc1]].
 
@@ -328,7 +328,7 @@ extend.
 now.
 
 doc1 [has what Status1]?
-doc1 \[has what private\] since [0-9]+ onwards
+doc1 \[has what private\] since [0-9]+ onwards.
 
 john [wants that john, do [publish what doc1]].
 
@@ -336,7 +336,7 @@ extend.
 now.
 
 doc1 [has what Status1]?
-doc1 \[has what public\] since [0-9]+ onwards
+doc1 \[has what public\] since [0-9]+ onwards.
 
 john [wants that john, do [hide what doc1]].
 
@@ -344,7 +344,7 @@ extend.
 now.
 
 doc1 [has what Status1]?
-doc1 \[has what private\] since [0-9]+ onwards
+doc1 \[has what private\] since [0-9]+ onwards.
 
 john [wants that john, do [publish what doc1]].
 
@@ -352,7 +352,7 @@ extend.
 now.
 
 doc1 [has what Status1]?
-doc1 \[has what public\] since [0-9]+ onwards
+doc1 \[has what public\] since [0-9]+ onwards.
 
 john [wants that john, do [hide what doc1]].
 
@@ -360,7 +360,7 @@ extend.
 now.
 
 doc1 [has what Status1]?
-doc1 \[has what private\] since [0-9]+ onwards
+doc1 \[has what private\] since [0-9]+ onwards.
 
 john [wants that john, do [publish what doc1]].
 
@@ -368,7 +368,7 @@ extend.
 now.
 
 doc1 [has what Status1]?
-doc1 \[has what public\] since [0-9]+ onwards
+doc1 \[has what public\] since [0-9]+ onwards.
 
 john [wants that john, do [hide what doc1]].
 
@@ -376,7 +376,7 @@ extend.
 now.
 
 doc1 [has what Status1]?
-doc1 \[has what private\] since [0-9]+ onwards
+doc1 \[has what private\] since [0-9]+ onwards.
 
 john [wants that john, do [publish what doc1]].
 
@@ -384,7 +384,7 @@ extend.
 now.
 
 doc1 [has what Status1]?
-doc1 \[has what public\] since [0-9]+ onwards
+doc1 \[has what public\] since [0-9]+ onwards.
 
 pete [wants that pete, do [view what doc1]].
 
@@ -399,14 +399,14 @@ extend.
 now.
 
 doc1 [has what Status1]?
-doc1 \[has what private\] since [0-9]+ onwards
+doc1 \[has what private\] since [0-9]+ onwards.
 
 pete [wants that pete, do [view what doc1]].
 
 extend.
 
 pete [view what doc1] now?
-False
+False.
 
 john [wants that john, do [publish what doc1]].
 
@@ -414,7 +414,7 @@ extend.
 now.
 
 doc1 [has what Status1]?
-doc1 \[has what public\] since [0-9]+ onwards
+doc1 \[has what public\] since [0-9]+ onwards.
 
 pete [wants that pete, do [view what doc1]].
 

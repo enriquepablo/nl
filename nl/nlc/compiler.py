@@ -22,6 +22,7 @@ import re
 import urllib2
 from collections import defaultdict
 import nl
+from nl.nlc.preprocessor import Preprocessor
 import ply.yacc as yacc
 
 # Get the token map from the lexer.  This is required.
@@ -68,6 +69,11 @@ def _from_var(var):
 
 # BNF
 
+def p_text(p):
+    '''text : sentence text
+            | sentence'''
+    p[0] = ';\n'.join(p[1:])
+
 def p_sentence(p):
     '''sentence : statement
                 | question
@@ -93,8 +99,9 @@ def p_import(p):
     except Exception, e:
         raise ImportError('Could not import %s. '
                           'Reason: %s' % (uri, str(e)))
+    preprocessed = Preprocessor().parse(remote.read())
     buff = ''
-    for sen in remote.readlines():
+    for sen in preprocessed.readlines():
         sen = sen.strip()
         if sen and not sen.startswith('#'):
             buff += ' ' + sen
