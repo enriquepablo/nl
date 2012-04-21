@@ -13,3 +13,7 @@ nl/history
 *.pyo
 *.swp
 nl-build
+clipstrace
+fromclips
+parser.out
+parsetab.py
