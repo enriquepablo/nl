@@ -17,11 +17,9 @@
 # along with any part of the nlproject.
 # If not, see <http://www.gnu.org/licenses/>.
 
-from nl.nlc.preprocessor import Preprocessor
 from nl.nlc import compiler
 
 
-def compile(s):
-    preprocessor = Preprocessor()
+def parse(s, preprocessor):
     preprocessed = preprocessor.parse(s)
     return compiler.yacc.parse(preprocessed)
