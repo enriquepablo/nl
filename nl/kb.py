@@ -154,6 +154,7 @@ def extend():
     and we want to query the system.
     '''
     acts = clips.Run()
+    logger.error(clips.ErrorStream.Read())
     return acts
 
 def open_kb(name):
